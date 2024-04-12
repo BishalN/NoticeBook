@@ -130,7 +130,9 @@ export const groupMembers = pgTable(
     id: serial("id").primaryKey(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     groupId: varchar("group_id", { length: 21 }).notNull(),
-    // isAdmin: boolean("is_admin").default(false).notNull(),
+    role: varchar("role", { length: 10, enum: ["member", "admin"] })
+      .default("member")
+      .notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
   },
@@ -193,32 +195,3 @@ export const groupPostRelations = relations(groupPosts, ({ one }) => ({
 }));
 
 export type GroupPost = typeof groupPosts.$inferSelect;
-
-export const groupAdmins = pgTable(
-  "group_admins",
-  {
-    id: serial("id").primaryKey(),
-    userId: varchar("user_id", { length: 21 }).notNull(),
-    groupId: varchar("group_id", { length: 21 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
-  },
-  (t) => ({
-    userIdx: index("group_admin_user_idx").on(t.userId),
-    groupIdx: index("group_admin_group_idx").on(t.groupId),
-  }),
-);
-
-// groupAdmin relations with groups and users table
-// One user can be admin of many groups
-// One group can have many admins
-export const groupAdminRelations = relations(groupAdmins, ({ one }) => ({
-  user: one(users, {
-    fields: [groupAdmins.userId],
-    references: [users.id],
-  }),
-  group: one(groups, {
-    fields: [groupAdmins.groupId],
-    references: [groups.id],
-  }),
-}));

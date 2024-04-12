@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     default: APP_TITLE,
     template: `%s | ${APP_TITLE}`,
   },
-  description: "Acme - Simple auth with lucia and trpc",
+  description: "Noticebook - Simple notice application",
   icons: [{ rel: "icon", url: "/icon.png" }],
 };
 
@@ -24,19 +24,10 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
-      >
+      <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
