@@ -106,3 +106,119 @@ export const postRelations = relations(posts, ({ one }) => ({
 
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
+
+export const groups = pgTable(
+  "groups",
+  {
+    id: varchar("id", { length: 21 }).primaryKey(),
+    username: varchar("username", { length: 255 }).notNull().unique(),
+    description: varchar("description", { length: 255 }).notNull(),
+    avatar: varchar("avatar", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    usernameIdx: index("group_username_idx").on(t.username),
+  }),
+);
+
+export type Group = typeof groups.$inferSelect;
+
+export const groupMembers = pgTable(
+  "group_members",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    groupId: varchar("group_id", { length: 21 }).notNull(),
+    // isAdmin: boolean("is_admin").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    userIdx: index("group_member_user_idx").on(t.userId),
+    groupIdx: index("group_member_group_idx").on(t.groupId),
+  }),
+);
+
+// groupMember relations with groups and users table
+// One user can be part of many groups
+// One group can have many users
+export const groupMemberRelations = relations(groupMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [groupMembers.userId],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+}));
+
+export type GroupMember = typeof groupMembers.$inferSelect;
+
+export const groupPosts = pgTable(
+  "group_posts",
+  {
+    id: varchar("id", { length: 15 }).primaryKey(),
+    groupId: varchar("group_id", { length: 21 }).notNull(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    excerpt: varchar("excerpt", { length: 255 }).notNull(),
+    content: text("content").notNull(),
+    status: varchar("status", { length: 10, enum: ["draft", "published"] })
+      .default("draft")
+      .notNull(),
+    tags: varchar("tags", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    groupIdIdx: index("group_post_group_id_idx").on(t.groupId),
+    createdAtIdx: index("group_post_created_at_idx").on(t.createdAt),
+  }),
+);
+
+// groupPost relations with groups and users table
+// One user can create many posts
+// One group can have many posts
+export const groupPostRelations = relations(groupPosts, ({ one }) => ({
+  user: one(users, {
+    fields: [groupPosts.userId],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [groupPosts.groupId],
+    references: [groups.id],
+  }),
+}));
+
+export type GroupPost = typeof groupPosts.$inferSelect;
+
+export const groupAdmins = pgTable(
+  "group_admins",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    groupId: varchar("group_id", { length: 21 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    userIdx: index("group_admin_user_idx").on(t.userId),
+    groupIdx: index("group_admin_group_idx").on(t.groupId),
+  }),
+);
+
+// groupAdmin relations with groups and users table
+// One user can be admin of many groups
+// One group can have many admins
+export const groupAdminRelations = relations(groupAdmins, ({ one }) => ({
+  user: one(users, {
+    fields: [groupAdmins.userId],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [groupAdmins.groupId],
+    references: [groups.id],
+  }),
+}));
