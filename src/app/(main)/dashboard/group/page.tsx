@@ -7,6 +7,8 @@ import { api } from "@/trpc/server";
 import React from "react";
 import { type RouterOutputs } from "@/trpc/shared";
 import EmptyState from "./_components/empty-state";
+import { CreateGroupDialog } from "./_components/create-new-group-dialog";
+import { JoinGroupDialog } from "./_components/join-group-dialog";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -33,9 +35,15 @@ export default async function GroupPage({ searchParams }: Props) {
 
   return (
     <div className="grid gap-8">
-      <div>
-        <h1 className="text-3xl font-bold md:text-4xl">Groups</h1>
-        <p className="text-sm text-muted-foreground">Manage your account groups</p>
+      <div className="flex flex-wrap justify-between">
+        <div>
+          <h1 className="text-3xl font-bold md:text-4xl">Groups</h1>
+          <p className="text-sm text-muted-foreground">Manage your account groups</p>
+        </div>
+        <div className="space-x-3">
+          <CreateGroupDialog />
+          <JoinGroupDialog />
+        </div>
       </div>
       <React.Suspense fallback={<div>Loading...</div>}>
         <Group promises={myGroups} />
@@ -51,7 +59,6 @@ interface GroupsProps {
 export function Group({ promises }: GroupsProps) {
   const [groups] = React.use(promises);
 
-  console.log(groups);
   return (
     <div>
       {groups.length > 0 ? (

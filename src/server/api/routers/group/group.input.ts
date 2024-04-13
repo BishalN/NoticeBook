@@ -16,8 +16,14 @@ export const deleteGroupSchema = z.object({
 });
 export type DeleteGroupInput = z.infer<typeof deleteGroupSchema>;
 
+export const searchGroupSchema = z.object({
+  username: z.string(),
+});
+export type SearchGroupInput = z.infer<typeof searchGroupSchema>;
+
 export const joinGroupSchema = z.object({
   groupId: z.string(),
+  message: z.string().optional(),
 });
 export type JoinGroupInput = z.infer<typeof joinGroupSchema>;
 

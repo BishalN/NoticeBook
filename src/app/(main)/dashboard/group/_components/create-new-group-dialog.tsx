@@ -17,10 +17,12 @@ import { createGroupSchema } from "@/server/api/routers/group/group.input";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
-export const NewGroupDialog = () => {
+export const CreateGroupDialog = () => {
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const createGroup = api.group.create.useMutation();
   const form = useForm({
@@ -32,7 +34,14 @@ export const NewGroupDialog = () => {
   });
   const onSubmit = form.handleSubmit(async (values) => {
     console.log("Submit triggered");
-    createGroup.mutate(values);
+    await createGroup.mutateAsync(values, {
+      onSuccess: () => {
+        // TODO: show a toast here
+        console.log("Group created successfully");
+        router.refresh();
+      },
+    });
+    // close the dialog and refresh the router here
   });
 
   return (

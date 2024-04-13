@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   varchar,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 
@@ -157,6 +158,34 @@ export const groupMemberRelations = relations(groupMembers, ({ one }) => ({
 }));
 
 export type GroupMember = typeof groupMembers.$inferSelect;
+// first search the name of the group and send the join request to the group
+// on the backend side, how to handle the join request ?
+// may be create a new table for the join request and then the admin can accept or reject the request
+// TODO: use the similar type of data for the primary key
+
+export const groupJoinRequests = pgTable(
+  "group_join_requests",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    groupId: varchar("group_id", { length: 21 }).notNull(),
+    message: text("message"),
+    status: varchar("status", { length: 10, enum: ["pending", "accepted", "rejected"] })
+      .default("pending")
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    userIdx: index("group_join_request_user_idx").on(t.userId),
+    groupIdx: index("group_join_request_group_idx").on(t.groupId),
+    // there can be only one request from one user to join a group at a time
+    // so we can create a unique index on userId and groupId
+    // TODO: create a unique index on userId and groupId
+
+    userGroupIdx: uniqueIndex("group_join_request_user_group_idx").on(t.userId, t.groupId),
+  }),
+);
 
 export const groupPosts = pgTable(
   "group_posts",

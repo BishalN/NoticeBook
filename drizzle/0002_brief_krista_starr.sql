@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "group_join_request_user_group_idx" ON "noticebook_group_join_requests" ("user_id","group_id");
