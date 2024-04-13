@@ -79,3 +79,5 @@ export {
   ArrowLeftIcon,
   GroupIcon,
 } from "@radix-ui/react-icons";
+
+export { CrownIcon } from "lucide-react";

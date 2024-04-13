@@ -5,10 +5,9 @@ import { env } from "@/env";
 import { validateRequest } from "@/lib/auth/validate-request";
 import { api } from "@/trpc/server";
 import React from "react";
-import { type RouterOutputs } from "@/trpc/shared";
-import EmptyState from "./_components/empty-state";
 import { CreateGroupDialog } from "./_components/create-new-group-dialog";
 import { JoinGroupDialog } from "./_components/join-group-dialog";
+import { GroupCard } from "./_components/group-card";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -46,31 +45,8 @@ export default async function GroupPage({ searchParams }: Props) {
         </div>
       </div>
       <React.Suspense fallback={<div>Loading...</div>}>
-        <Group promises={myGroups} />
+        <GroupCard promises={myGroups} />
       </React.Suspense>
-    </div>
-  );
-}
-
-interface GroupsProps {
-  promises: Promise<[RouterOutputs["group"]["myGroups"]]>;
-}
-
-export function Group({ promises }: GroupsProps) {
-  const [groups] = React.use(promises);
-
-  return (
-    <div>
-      {groups.length > 0 ? (
-        groups.map((group) => (
-          <div key={group.id}>
-            <h2>{group.group.username}</h2>
-            <p>{group.group.description}</p>
-          </div>
-        ))
-      ) : (
-        <EmptyState />
-      )}
     </div>
   );
 }
