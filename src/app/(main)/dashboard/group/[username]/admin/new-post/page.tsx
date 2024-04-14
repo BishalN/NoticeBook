@@ -1,5 +1,5 @@
 import { api } from "@/trpc/server";
-import { GroupPostEditor } from "../_components/simple-group-post-editor";
+import { GroupPostEditor } from "../../_components/simple-group-post-editor";
 
 export default async function Page({ params }: { params: { username: string } }) {
   // gert group using username

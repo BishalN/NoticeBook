@@ -131,6 +131,8 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
     throw new Error("Unauthorized to view the posts of this group");
   }
 
+  console.log(`groupId is ${input.groupId}`);
+
   return ctx.db.query.groupPosts.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),
     offset: (input.page - 1) * input.perPage,
