@@ -33,7 +33,6 @@ export const CreateGroupDialog = () => {
     resolver: zodResolver(createGroupSchema),
   });
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log("Submit triggered");
     await createGroup.mutateAsync(values, {
       onSuccess: () => {
         // TODO: show a toast here

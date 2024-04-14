@@ -1,3 +1,4 @@
+import { title } from "process";
 import { z } from "zod";
 
 export const createGroupSchema = z.object({
@@ -21,6 +22,11 @@ export const searchGroupSchema = z.object({
 });
 export type SearchGroupInput = z.infer<typeof searchGroupSchema>;
 
+export const getGroupByUsernameSchema = z.object({
+  username: z.string(),
+});
+export type GetGroupByUsernameInput = z.infer<typeof getGroupByUsernameSchema>;
+
 export const joinGroupSchema = z.object({
   groupId: z.string(),
   message: z.string().optional(),
@@ -42,3 +48,46 @@ export const getGroupSchema = z.object({
   id: z.string(),
 });
 export type GetGroupInput = z.infer<typeof getGroupSchema>;
+
+// creategrouppostinput
+
+export const createGroupPostSchema = z.object({
+  groupId: z.string(),
+  title: z.string().min(3).max(255),
+  content: z.string().min(3),
+  excerpt: z.string().min(3).max(255),
+});
+export type CreateGroupPostInput = z.infer<typeof createGroupPostSchema>;
+
+export const updateGroupPostSchema = createGroupPostSchema.extend({
+  id: z.string(),
+  titlle: z.string().min(3).max(255).optional(),
+  content: z.string().min(3).optional(),
+  excerpt: z.string().min(3).max(255).optional(),
+});
+export type UpdateGroupPostInput = z.infer<typeof updateGroupPostSchema>;
+
+export const deleteGroupPostSchema = z.object({
+  postId: z.string(),
+  groupId: z.string(),
+});
+export type DeleteGroupPostInput = z.infer<typeof deleteGroupPostSchema>;
+
+export const searchGroupPostSchema = z.object({
+  groupId: z.string(),
+  title: z.string(),
+});
+export type SearchGroupPostInput = z.infer<typeof searchGroupPostSchema>;
+
+export const listGroupPostSchema = z.object({
+  groupId: z.string(),
+  page: z.number().int().default(1),
+  perPage: z.number().int().default(12),
+});
+export type ListGroupPostInput = z.infer<typeof listGroupPostSchema>;
+
+export const getGroupPostSchema = z.object({
+  postId: z.string(),
+  groupId: z.string(),
+});
+export type GetGroupPostInput = z.infer<typeof getGroupPostSchema>;

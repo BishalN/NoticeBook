@@ -9,6 +9,10 @@ export const groupRouter = createTRPCRouter({
 
   myGroups: protectedProcedure.query(({ ctx }) => services.myGroups(ctx)),
 
+  getByUsername: protectedProcedure
+    .input(inputs.getGroupByUsernameSchema)
+    .query(({ ctx, input }) => services.getGroupByUsername(ctx, input)),
+
   create: protectedProcedure
     .input(inputs.createGroupSchema)
     .mutation(({ ctx, input }) => services.createGroup(ctx, input)),
@@ -20,4 +24,24 @@ export const groupRouter = createTRPCRouter({
   createJoinRequest: protectedProcedure
     .input(inputs.joinGroupSchema)
     .mutation(({ ctx, input }) => services.createJoinGroupRequest(ctx, input)),
+
+  createGroupPost: protectedProcedure
+    .input(inputs.createGroupPostSchema)
+    .mutation(({ ctx, input }) => services.createGroupPost(ctx, input)),
+
+  updateGroupPost: protectedProcedure
+    .input(inputs.updateGroupPostSchema)
+    .mutation(({ ctx, input }) => services.updateGroupPost(ctx, input)),
+
+  deleteGroupPost: protectedProcedure
+    .input(inputs.deleteGroupPostSchema)
+    .mutation(({ ctx, input }) => services.deleteGroupPost(ctx, input)),
+
+  listPosts: protectedProcedure
+    .input(inputs.listGroupPostSchema)
+    .query(({ ctx, input }) => services.listGroupPosts(ctx, input)),
+
+  getPost: protectedProcedure
+    .input(inputs.getGroupPostSchema)
+    .query(({ ctx, input }) => services.getGroupPost(ctx, input)),
 });
