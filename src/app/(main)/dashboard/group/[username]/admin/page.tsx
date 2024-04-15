@@ -1,13 +1,9 @@
-// This page is for admins only
-
-// create a simple dynamic page that displays the username from the url
-
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { TabsDemo } from "../_components/tabs";
+import { InviteAndManageUsersTabs } from "../_components/invite-manage-users-tabs";
 
 export default async function Page({ params }: { params: { username: string } }) {
   const groups = await api.group.myGroups.query();
@@ -32,7 +28,7 @@ export default async function Page({ params }: { params: { username: string } })
           </Button>
         </Link>
       </div>
-      <TabsDemo group={group.group} />
+      <InviteAndManageUsersTabs group={group.group} />
     </div>
   );
 }

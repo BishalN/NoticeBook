@@ -35,6 +35,7 @@ export default async function Page({ params }: { params: { username: string } })
           recentNotices.map((notice) => {
             return (
               <NoticeCard
+                isAdmin={group.role === "admin"}
                 title={notice.title}
                 createdAt={notice.createdAt}
                 username={notice.user.email}

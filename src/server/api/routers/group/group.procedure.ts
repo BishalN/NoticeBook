@@ -49,4 +49,20 @@ export const groupRouter = createTRPCRouter({
   getPost: protectedProcedure
     .input(inputs.getGroupPostSchema)
     .query(({ ctx, input }) => services.getGroupPost(ctx, input)),
+
+  createInvite: protectedProcedure
+    .input(inputs.createGroupInviteSchema)
+    .mutation(({ ctx, input }) => services.createGroupInvite(ctx, input)),
+
+  getInvite: protectedProcedure
+    .input(inputs.getGroupInviteSchema)
+    .query(({ ctx, input }) => services.getGroupInvite(ctx, input)),
+
+  revalidateInvite: protectedProcedure
+    .input(inputs.revalidateInviteSchema)
+    .mutation(({ ctx, input }) => services.revalidateInvite(ctx, input)),
+
+  acceptInvite: protectedProcedure
+    .input(inputs.acceptInviteSchema)
+    .mutation(({ ctx, input }) => services.acceptInvite(ctx, input)),
 });

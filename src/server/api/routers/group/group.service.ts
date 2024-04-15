@@ -1,4 +1,10 @@
-import { groupJoinRequests, groupMembers, groupPosts, groups } from "@/server/db/schema";
+import {
+  groupInvites,
+  groupJoinRequests,
+  groupMembers,
+  groupPosts,
+  groups,
+} from "@/server/db/schema";
 import { type ProtectedTRPCContext } from "../../trpc";
 import {
   type JoinGroupInput,
@@ -12,6 +18,9 @@ import {
   type GetGroupPostInput,
   type GetGroupByUsernameInput,
   type CheckIfAlreadyRequestedInput,
+  type GetGroupInviteInput,
+  type CreateGroupInviteInput,
+  type RevalidateInviteInput,
 } from "./group.input";
 import { generateId } from "lucia";
 import { and, eq, inArray, like, not } from "drizzle-orm";
@@ -217,4 +226,145 @@ export const deleteGroupPost = async (ctx: ProtectedTRPCContext, input: DeleteGr
   }
 
   await ctx.db.delete(groupPosts).where(eq(groupPosts.id, input.postId));
+};
+
+export const getGroupInvite = async (ctx: ProtectedTRPCContext, input: GetGroupInviteInput) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to get the invite link");
+  }
+
+  const groupInvite = await ctx.db.query.groupInvites.findFirst({
+    where: (invite, { eq, and }) =>
+      and(eq(invite.groupId, input.groupId), eq(invite.status, "valid")),
+  });
+
+  return groupInvite;
+};
+
+export const createGroupInvite = async (
+  ctx: ProtectedTRPCContext,
+  input: CreateGroupInviteInput,
+) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to get the invite link");
+  }
+
+  // check if the invite link already exists for the group which is valid
+  const groupInvite = await ctx.db.query.groupInvites.findFirst({
+    where: (invite, { eq, and }) =>
+      and(eq(invite.groupId, input.groupId), eq(invite.status, "valid")),
+  });
+  // TODO: handle this may be differently
+  if (groupInvite) return groupInvite;
+
+  const inviteLink = generateId(15);
+  const invite = await ctx.db
+    .insert(groupInvites)
+    .values({
+      id: inviteLink,
+      groupId: input.groupId,
+      status: "valid",
+    })
+    .returning();
+
+  return invite[0];
+};
+
+export const revalidateInvite = async (ctx: ProtectedTRPCContext, input: RevalidateInviteInput) => {
+  // Check if the user is the admin of the group
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to revalidate the invite link");
+  }
+
+  // update the old invite link to invalid
+  await ctx.db
+    .update(groupInvites)
+    .set({ status: "invalid" })
+    .where(and(eq(groupInvites.groupId, input.groupId), eq(groupInvites.id, input.oldInviteId)));
+
+  // Generate a new invite link
+  const inviteLink = generateId(15);
+  const newInvite = await ctx.db
+    .insert(groupInvites)
+    .values({
+      id: inviteLink,
+      groupId: input.groupId,
+      status: "valid",
+    })
+    .returning();
+
+  return newInvite[0];
+};
+
+export const acceptInvite = async (ctx: ProtectedTRPCContext, input: { inviteId: string }) => {
+  const invite = await ctx.db.query.groupInvites.findFirst({
+    where: (table, { eq, and }) => and(eq(table.id, input.inviteId), eq(table.status, "valid")),
+  });
+
+  if (!invite) {
+    return {
+      message: "Invalid invite link",
+    };
+  }
+
+  // check if the user is already part of the group
+  const isMember = await ctx.db.query.groupMembers.findFirst({
+    where: (table, { eq }) => eq(table.userId, ctx.user.id),
+  });
+
+  if (isMember) {
+    return {
+      message: "You are already part of the group",
+      group: await ctx.db.query.groups.findFirst({
+        where: (table, { eq }) => eq(table.id, invite.groupId),
+      }),
+    };
+  }
+
+  await ctx.db.insert(groupMembers).values({
+    id: generateId(15),
+    userId: ctx.user.id,
+    groupId: invite.groupId,
+    role: "member",
+  });
+
+  return {
+    message: "You have successfully joined the group",
+    group: await ctx.db.query.groups.findFirst({
+      where: (table, { eq }) => eq(table.id, invite.groupId),
+    }),
+  };
 };

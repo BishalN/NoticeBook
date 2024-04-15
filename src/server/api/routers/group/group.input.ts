@@ -96,3 +96,24 @@ export const getGroupPostSchema = z.object({
   groupId: z.string(),
 });
 export type GetGroupPostInput = z.infer<typeof getGroupPostSchema>;
+
+export const revalidateInviteSchema = z.object({
+  groupId: z.string(),
+  oldInviteId: z.string(),
+});
+export type RevalidateInviteInput = z.infer<typeof revalidateInviteSchema>;
+
+export const getGroupInviteSchema = z.object({
+  groupId: z.string(),
+});
+export type GetGroupInviteInput = z.infer<typeof getGroupInviteSchema>;
+
+export const createGroupInviteSchema = z.object({
+  groupId: z.string(),
+});
+export type CreateGroupInviteInput = z.infer<typeof createGroupInviteSchema>;
+
+export const acceptInviteSchema = z.object({
+  inviteId: z.string(),
+});
+export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;

@@ -145,10 +145,6 @@ export const groupJoinRequests = pgTable(
   (t) => ({
     userIdx: index("group_join_request_user_idx").on(t.userId),
     groupIdx: index("group_join_request_group_idx").on(t.groupId),
-    // there can be only one request from one user to join a group at a time
-    // so we can create a unique index on userId and groupId
-    // TODO: create a unique index on userId and groupId
-
     userGroupIdx: uniqueIndex("group_join_request_user_group_idx").on(t.userId, t.groupId),
   }),
 );
@@ -190,3 +186,30 @@ export const groupPostRelations = relations(groupPosts, ({ one }) => ({
 }));
 
 export type GroupPost = typeof groupPosts.$inferSelect;
+
+export const groupInvites = pgTable(
+  "group_invites",
+  {
+    id: varchar("id", { length: 15 }).primaryKey(),
+    groupId: varchar("group_id", { length: 21 }).notNull(),
+    status: varchar("status", { length: 10, enum: ["valid", "invalid"] })
+      .default("valid")
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    groupIdIdx: index("group_invite_group_id_idx").on(t.groupId),
+    // there will be a single row with valid status and group id
+    // no two invite links can be valid for the same group at a time
+  }),
+);
+
+export type GroupInvite = typeof groupInvites.$inferSelect;
+
+export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupInvites.groupId],
+    references: [groups.id],
+  }),
+}));

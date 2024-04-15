@@ -8,6 +8,7 @@ export const metadata = {
   description: "Signup Page",
 };
 
+// TODO:  Handle inviteId query param
 export default async function SignupPage() {
   const { user } = await validateRequest();
 
