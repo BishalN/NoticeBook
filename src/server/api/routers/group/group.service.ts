@@ -133,11 +133,14 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
 
   console.log(`groupId is ${input.groupId}`);
 
+  // expand the userId to get the user details
+  // use the with option to get the user details
   return ctx.db.query.groupPosts.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),
     offset: (input.page - 1) * input.perPage,
     limit: input.perPage,
     orderBy: (table, { desc }) => desc(table.createdAt),
+    with: { user: { columns: { avatar: true, email: true } } },
   });
 };
 

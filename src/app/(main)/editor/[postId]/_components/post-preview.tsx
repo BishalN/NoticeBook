@@ -17,12 +17,13 @@ const options: Components = {
   ),
 };
 
-export const PostPreview = ({ text }: { text: string }) => {
+export const PostPreview = ({ text, className }: { text: string; className?: string }) => {
   return (
     <Markdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
       components={options}
+      className={className}
     >
       {text}
     </Markdown>

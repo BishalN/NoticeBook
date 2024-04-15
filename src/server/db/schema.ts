@@ -13,6 +13,7 @@ import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
+// TODO: add username field as well or just name field
 export const users = pgTable(
   "users",
   {

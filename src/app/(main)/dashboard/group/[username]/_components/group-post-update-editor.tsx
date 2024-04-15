@@ -16,43 +16,43 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-import { createGroupPostSchema } from "@/server/api/routers/group/group.input";
+import { updateGroupPostSchema } from "@/server/api/routers/group/group.input";
 import { PostPreview } from "@/app/(main)/editor/[postId]/_components/post-preview";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { type GroupPost } from "@/server/db/schema";
 
 const markdownlink = "https://remarkjs.github.io/react-markdown/";
 
 interface GroupPostEditorProps {
   groupId: string;
+  notice: GroupPost;
 }
 
-export const GroupPostEditor = ({ groupId }: GroupPostEditorProps) => {
+export const GroupPostUpdateEditor = ({ groupId, notice }: GroupPostEditorProps) => {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const createPost = api.group.createGroupPost.useMutation();
+  const updateGroupPost = api.group.updateGroupPost.useMutation();
   const form = useForm({
     defaultValues: {
-      title: "",
-      excerpt: "",
-      content: "",
+      title: notice.title,
+      excerpt: notice.excerpt,
+      content: notice.content,
       groupId: String(groupId),
+      id: String(notice.id),
     },
-    resolver: zodResolver(createGroupPostSchema),
+    resolver: zodResolver(updateGroupPostSchema),
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = form.handleSubmit(async (values) => {
-    createPost.mutate(
-      { ...values, groupId },
+    updateGroupPost.mutate(
+      { ...values },
       {
         onSuccess: () => {
           // TODO: redirect to the post page
-          toast.success("Post created successfully!");
+          toast.success("Post updated successfully!");
           // goback route
-          // TODO: the back page needs to be refreshed or reloaded
           router.back();
         },
         onError: (err) => {
@@ -69,6 +69,18 @@ export const GroupPostEditor = ({ groupId }: GroupPostEditorProps) => {
           <FormField
             control={form.control}
             name="groupId"
+            render={({ field }) => (
+              <FormItem className="hidden">
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="id"
             render={({ field }) => (
               <FormItem className="hidden">
                 <FormControl>
@@ -138,14 +150,13 @@ export const GroupPostEditor = ({ groupId }: GroupPostEditorProps) => {
           />
           <Button
             onClick={() => {
-              console.log("req submitted");
               formRef.current?.requestSubmit();
             }}
-            disabled={!form.formState.isDirty || createPost.isLoading}
+            disabled={!form.formState.isDirty || updateGroupPost.isLoading}
             type="submit"
             className="ml-auto"
           >
-            Save
+            Update
           </Button>
         </form>
       </Form>

@@ -1,13 +1,9 @@
-// This page shows the recent posts of a group
-
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
-import { TabsDemo } from "./_components/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon, PencilIcon, PlusIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NoticeCard } from "./_components/notice-card";
 
 export default async function Page({ params }: { params: { username: string } }) {
   // Redirect if user not member of the group
@@ -21,10 +17,8 @@ export default async function Page({ params }: { params: { username: string } })
     redirect("/dashboard/group");
   }
 
-  // get recent posts
-  const recentPosts = await api.group.listPosts.query({ groupId: String(group.id) });
-
-  console.log(recentPosts);
+  // get recent notices
+  const recentNotices = await api.group.listPosts.query({ groupId: String(group.groupId) });
 
   return (
     <div>
@@ -40,46 +34,29 @@ export default async function Page({ params }: { params: { username: string } })
       </div>
 
       <div className="my-3 space-y-3">
-        <NoticeCard />
-        <NoticeCard />
-        <NoticeCard />
+        {recentNotices.length > 0 ? (
+          recentNotices.map((notice) => {
+            return (
+              <NoticeCard
+                title={notice.title}
+                createdAt={notice.createdAt}
+                username={notice.user.email}
+                avatar={notice.user.avatar ?? ""}
+                excerpt={notice.excerpt}
+                key={notice.id}
+                groupUsername={group.group.username}
+                groupId={group.groupId}
+                noticeId={notice.id}
+              />
+            );
+          })
+        ) : (
+          <div>
+            {/* TODO: improve this empty state */}
+            <p>No notices found</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-export const NoticeCard = () => {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="mb-3 flex justify-between space-x-3">
-          <div className="flex space-x-3">
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-semibold">Shad</span>
-              <span className="text-xs text-gray-500">admin</span>
-              <span className="text-xs text-gray-500">2 days ago</span>
-            </div>
-          </div>
-
-          {/* TODO: only show for admins */}
-          <Button variant="secondary" className="space-x-2">
-            <PencilIcon className="h-4 w-4" />
-            <span>Edit</span>
-          </Button>
-        </div>
-        <div className="mb-3">
-          <h1 className="text-2xl font-semibold">Notice Title</h1>
-          <h2 className="text-muted-foreground">Notice Excerpts</h2>
-        </div>
-        <Button variant="secondary" className="space-x-2">
-          <PlusIcon className="h-4 w-4" />
-          <span>Read More</span>
-        </Button>
-      </CardHeader>
-    </Card>
-  );
-};
