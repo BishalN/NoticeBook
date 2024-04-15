@@ -117,3 +117,33 @@ export const acceptInviteSchema = z.object({
   inviteId: z.string(),
 });
 export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;
+
+export const getJoinRequestsSchema = z.object({
+  groupId: z.string(),
+});
+export type GetJoinRequestsInput = z.infer<typeof getJoinRequestsSchema>;
+
+export const rejectJoinRequestSchema = z.object({
+  requestId: z.string(),
+  groupId: z.string(),
+});
+export type RejectJoinRequestInput = z.infer<typeof rejectJoinRequestSchema>;
+
+export const acceptJoinRequestSchema = z.object({
+  requestId: z.string(),
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type AcceptJoinRequestInput = z.infer<typeof acceptJoinRequestSchema>;
+
+export const getMembersSchema = z.object({
+  groupId: z.string(),
+});
+export type GetMembersInput = z.infer<typeof getMembersSchema>;
+
+export const updateMemberSchema = z.object({
+  groupId: z.string(),
+  userId: z.string(),
+  role: z.enum(["admin", "member"]),
+});
+export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;

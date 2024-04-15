@@ -149,6 +149,20 @@ export const groupJoinRequests = pgTable(
   }),
 );
 
+// groupJoinRequest relations with groups and users table
+// One user can request to join many groups
+// One group can have many join requests
+export const groupJoinRequestRelations = relations(groupJoinRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [groupJoinRequests.userId],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [groupJoinRequests.groupId],
+    references: [groups.id],
+  }),
+}));
+
 export const groupPosts = pgTable(
   "group_posts",
   {

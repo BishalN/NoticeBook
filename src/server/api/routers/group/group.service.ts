@@ -21,6 +21,10 @@ import {
   type GetGroupInviteInput,
   type CreateGroupInviteInput,
   type RevalidateInviteInput,
+  type GetJoinRequestsInput,
+  type GetMembersInput,
+  type RejectJoinRequestInput,
+  type AcceptJoinRequestInput,
 } from "./group.input";
 import { generateId } from "lucia";
 import { and, eq, inArray, like, not } from "drizzle-orm";
@@ -88,14 +92,20 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
     .map((group) => group.id)
     .concat(requestedGroupIds.map((group) => group.groupId));
 
-  const data = await ctx.db
-    .select()
-    .from(groups)
-    .where(
-      and(like(groups.username, `%${input.username}%`), not(inArray(groups.id, noShowGroupIds))),
-    );
-
-  return data;
+  // TODO: make username case insensitive search
+  if (noShowGroupIds.length === 0) {
+    return ctx.db
+      .select()
+      .from(groups)
+      .where(and(like(groups.username, `%${input.username}%`)));
+  } else {
+    return ctx.db
+      .select()
+      .from(groups)
+      .where(
+        and(like(groups.username, `%${input.username}%`), not(inArray(groups.id, noShowGroupIds))),
+      );
+  }
 };
 
 export const createJoinGroupRequest = async (ctx: ProtectedTRPCContext, input: JoinGroupInput) => {
@@ -367,4 +377,106 @@ export const acceptInvite = async (ctx: ProtectedTRPCContext, input: { inviteId:
       where: (table, { eq }) => eq(table.id, invite.groupId),
     }),
   };
+};
+
+export const getJoinRequests = async (ctx: ProtectedTRPCContext, input: GetJoinRequestsInput) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to get the join requests");
+  }
+
+  return ctx.db.query.groupJoinRequests.findMany({
+    where: (table, { eq, and }) =>
+      and(eq(table.groupId, input.groupId), eq(table.status, "pending")),
+    with: { user: { columns: { avatar: true, email: true } } },
+  });
+};
+
+export const rejectJoinRequest = async (
+  ctx: ProtectedTRPCContext,
+  input: RejectJoinRequestInput,
+) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to update the join request");
+  }
+
+  await ctx.db
+    .update(groupJoinRequests)
+    .set({ status: "rejected" })
+    .where(eq(groupJoinRequests.id, input.requestId));
+};
+
+export const acceptJoinRequest = async (
+  ctx: ProtectedTRPCContext,
+  input: AcceptJoinRequestInput,
+) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to update the join request");
+  }
+
+  await ctx.db
+    .update(groupJoinRequests)
+    .set({ status: "accepted" })
+    .where(eq(groupJoinRequests.id, input.requestId));
+
+  await ctx.db.insert(groupMembers).values({
+    id: generateId(15),
+    userId: input.userId,
+    groupId: input.groupId,
+    role: "member",
+  });
+};
+
+export const getMembers = async (ctx: ProtectedTRPCContext, input: GetMembersInput) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to get the members");
+  }
+
+  return ctx.db.query.groupMembers.findMany({
+    where: (table, { eq }) => eq(table.groupId, input.groupId),
+    with: { user: { columns: { avatar: true, email: true } } },
+  });
 };

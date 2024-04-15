@@ -17,31 +17,6 @@ import { Crown, MinusIcon, PencilIcon, ReplaceIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-// On backend side we need to generate a temporary invite link for the user to join the group
-
-// Workflow for invite users works like this
-// on backend we'll have a table that will have
-// id, groupid, status = "valid" or "invalid"
-// here invite id will work like a code/token
-
-// on front first check if there is an invite link for the group
-// if there is no invite link then show the create invite link button
-// on frontend the admin will first click on the create invite button to create
-// first invite link and it'll be shown in a text box with a copy button
-// the admin can then send the link to the user
-
-// when the user with already an account clicks on the link
-// the frontend will send a request to the backend to check if the link is valid
-// if it is valid the user will be added to the group
-
-// if the user doesn't have an account and clicks on the link
-// the frontend will redirect the user to the signup page with the group id
-// and the group id will be stored in the local storage or just in url params with redirect to param
-// and the user will be added to the group after the signup
-
-// if the admin wants to revalidate the link he can click on the revalidate button
-// this will generate a new link and the old link will be invalid
-
 interface InviteAndManageUsersTabs {
   group: {
     avatar: string | null;
@@ -52,7 +27,9 @@ interface InviteAndManageUsersTabs {
 }
 export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
   const router = useRouter();
-  const { data, isLoading } = api.group.getInvite.useQuery({ groupId: group.id });
+  const { data: inviteData, isLoading: inviteDataLoading } = api.group.getInvite.useQuery({
+    groupId: group.id,
+  });
   const createInvite = api.group.createInvite.useMutation({
     onSuccess: () => {
       toast.success("Invite link created");
@@ -61,10 +38,16 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
   const revalidateInvite = api.group.revalidateInvite.useMutation({
     onSuccess: () => {
       toast.success("Invite link revalidated");
-
       // TODO: invalidate the getInvite query
       router.refresh(); // this is hack to revalidate the query for now
     },
+  });
+
+  const { data: joinRequests, isLoading: joinRequestsLoading } = api.group.getJoinRequests.useQuery(
+    { groupId: group.id },
+  );
+  const { data: groupMembers, isLoading: groupMembersLoading } = api.group.getMembers.useQuery({
+    groupId: group.id,
   });
 
   return (
@@ -85,9 +68,9 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
             <CardDescription>{group.description}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center space-y-2">
-            {isLoading && <p>Loading...</p>}
+            {inviteDataLoading && <p>Loading...</p>}
 
-            {!isLoading && !data && (
+            {!inviteDataLoading && !inviteData && (
               <div>
                 <Button
                   onClick={() => {
@@ -100,19 +83,21 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
               </div>
             )}
 
-            {!isLoading && data && (
+            {!inviteDataLoading && inviteData && (
               <div className="w-full">
-                <CopyToClipboard text={`http://localhost:3000/dashboard/group/invite/${data.id}`} />
+                <CopyToClipboard
+                  text={`http://localhost:3000/dashboard/group/invite/${inviteData.id}`}
+                />
                 <p className="text-center text-muted-foreground">Invitation link</p>
               </div>
             )}
           </CardContent>
 
-          {!isLoading && data && (
+          {!inviteDataLoading && inviteData && (
             <CardFooter className="flex justify-center space-x-3">
               <Button
                 onClick={() => {
-                  revalidateInvite.mutate({ groupId: group.id, oldInviteId: data.id });
+                  revalidateInvite.mutate({ groupId: group.id, oldInviteId: inviteData.id });
                 }}
                 variant="destructive"
                 className="space-x-2"
@@ -136,14 +121,41 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
           <CardContent className="space-y-2">
             <div className="space-y-3">
               <p className="my-3 font-semibold">Requests to join</p>
-              <RequestCard group={{ avatar: group.avatar ?? "", username: group.username }} />
-              <RequestCard group={{ avatar: group.avatar ?? "", username: group.username }} />
+              {joinRequestsLoading && <p className="text-muted-foreground">Loading...</p>}
+              {!joinRequestsLoading && joinRequests?.length === 0 && (
+                <p className="text-muted-foreground">No requests to join</p>
+              )}
+              {joinRequests?.map((request) => (
+                <RequestCard
+                  key={request.id}
+                  group={{
+                    avatar: request.user.avatar ?? "",
+                    username: request.user.email,
+                    message: request.message ?? "",
+                    requestedAt: request.createdAt,
+                    id: group.id,
+                    requestId: request.id,
+                    userId: request.userId,
+                  }}
+                />
+              ))}
             </div>
 
             <div className="space-y-3">
               <p className="my-3 font-semibold">Users</p>
-              <UserCard avatar="" isAdmin={true} isMe={false} username="Bishal Neupane" />
-              <UserCard avatar="" isAdmin={false} isMe={true} username="Matt" />
+              {groupMembersLoading && <p className="text-muted-foreground">Loading...</p>}
+              {!groupMembersLoading && groupMembers?.length === 0 && (
+                <p className="text-muted-foreground">No users in the group</p>
+              )}
+              {groupMembers?.map((member) => (
+                <UserCard
+                  key={member.id}
+                  avatar={member.user.avatar ?? ""}
+                  isAdmin={member.role === "admin"}
+                  isMe={false}
+                  username={member.user.email}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -152,7 +164,37 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
   );
 }
 
-export const RequestCard = ({ group }: { group: { avatar: string; username: string } }) => {
+export const RequestCard = ({
+  group,
+}: {
+  group: {
+    id: string;
+    requestId: string;
+    avatar: string;
+    username: string;
+    message: string;
+    requestedAt: Date;
+    userId: string;
+  };
+}) => {
+  const rejectJoinRequest = api.group.rejectJoinRequest.useMutation({
+    onSuccess: () => {
+      toast.success("Request rejected successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update request");
+    },
+  });
+
+  const acceptJoinRequest = api.group.acceptJoinRequest.useMutation({
+    onSuccess: () => {
+      toast.success("Request accepted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update request");
+    },
+  });
+
   return (
     <Card>
       <CardHeader className="flex items-center justify-center space-y-2">
@@ -160,12 +202,35 @@ export const RequestCard = ({ group }: { group: { avatar: string; username: stri
           <AvatarImage src={group.avatar} />
           <AvatarFallback>{group.username[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
-        <CardTitle className="text-md">Emilia Gates</CardTitle>
-        <CardDescription>Please accept me into your group</CardDescription>
+        <CardTitle className="text-md">{group.username}</CardTitle>
+        <CardDescription>{group.message}</CardDescription>
         <div className="space-x-3 space-y-3">
-          <Button variant="secondary">Accept</Button>
-          <Button variant="destructive">Reject</Button>
-          <div className="text-muted-foreground">Requested 2 days ago</div>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              acceptJoinRequest.mutate({
+                groupId: group.id,
+                requestId: group.requestId,
+                userId: group.userId,
+              });
+            }}
+            disabled={acceptJoinRequest.isLoading}
+          >
+            Accept
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              rejectJoinRequest.mutate({
+                groupId: group.id,
+                requestId: group.requestId,
+              });
+            }}
+            disabled={rejectJoinRequest.isLoading}
+          >
+            Reject
+          </Button>
+          <div className="text-muted-foreground">{group.requestedAt.toLocaleDateString()}</div>
         </div>
       </CardHeader>
     </Card>

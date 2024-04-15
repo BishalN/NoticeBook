@@ -25,6 +25,18 @@ export const groupRouter = createTRPCRouter({
     .input(inputs.joinGroupSchema)
     .mutation(({ ctx, input }) => services.createJoinGroupRequest(ctx, input)),
 
+  getJoinRequests: protectedProcedure
+    .input(inputs.getJoinRequestsSchema)
+    .query(({ ctx, input }) => services.getJoinRequests(ctx, input)),
+
+  acceptJoinRequest: protectedProcedure
+    .input(inputs.acceptJoinRequestSchema)
+    .mutation(({ ctx, input }) => services.acceptJoinRequest(ctx, input)),
+
+  rejectJoinRequest: protectedProcedure
+    .input(inputs.rejectJoinRequestSchema)
+    .mutation(({ ctx, input }) => services.rejectJoinRequest(ctx, input)),
+
   // checkIfAlreadyRequested
   checkIfJoinRequested: protectedProcedure
     .input(inputs.checkIfAlreadyRequestedSchema)
@@ -65,4 +77,8 @@ export const groupRouter = createTRPCRouter({
   acceptInvite: protectedProcedure
     .input(inputs.acceptInviteSchema)
     .mutation(({ ctx, input }) => services.acceptInvite(ctx, input)),
+
+  getMembers: protectedProcedure
+    .input(inputs.getMembersSchema)
+    .query(({ ctx, input }) => services.getMembers(ctx, input)),
 });
