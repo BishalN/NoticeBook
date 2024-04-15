@@ -10,27 +10,24 @@ export default async function Page({ params }: { params: { username: string } })
   const groups = await api.group.myGroups.query();
   const group = groups.find((group) => group.group.username === params.username);
 
-  // const isCurrentUserAdmin
-  // use the groupmembers table to check if the user is an admin
-
   if (!group) {
     redirect("/dashboard/group");
   }
 
-  // get recent notices
   const recentNotices = await api.group.listPosts.query({ groupId: String(group.groupId) });
 
   return (
     <div>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold">{params.username}</h1>
-        {/* // TODO: only show this button if user is admin */}
-        <Link href={`/dashboard/group/${params.username}/admin`} passHref>
-          <Button className="space-x-2" variant="secondary">
-            <ArrowRightIcon className="h-4 w-4" />
-            <span>Go to Admin page</span>
-          </Button>
-        </Link>
+        {group.role === "admin" && (
+          <Link href={`/dashboard/group/${params.username}/admin`} passHref>
+            <Button className="space-x-2" variant="secondary">
+              <ArrowRightIcon className="h-4 w-4" />
+              <span>Go to Admin page</span>
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="my-3 space-y-3">

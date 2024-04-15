@@ -5,20 +5,23 @@ import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-// first search the name of the group and send the join request to the group
-// on the backend side, how to handle the join request ?
-// may be create a new table for the join request and then the admin can accept or reject the request
-
-// TODO: Use debounce for search and eliminate the jaggering effect
 export const JoinGroupDialog = () => {
   const [searchValue, setSearchValue] = useState("");
-  const { data, isLoading } = api.group.search.useQuery({ username: searchValue });
+  const debouncedSearchTerm = useDebounce(searchValue, 300);
+
+  const { data, isLoading } = api.group.search.useQuery(
+    { username: debouncedSearchTerm },
+    { enabled: debouncedSearchTerm.length > 0 },
+  );
   const createJoinRequest = api.group.createJoinRequest.useMutation();
+
+  // const {data} = api.group.checkIfJoinRequested.useQuery({groupId: group.id})
 
   const router = useRouter();
 
@@ -42,9 +45,6 @@ export const JoinGroupDialog = () => {
         },
       },
     );
-    toast.success("Request sent successfully");
-    // close the dialog
-    router.refresh();
   };
 
   return (
@@ -52,6 +52,7 @@ export const JoinGroupDialog = () => {
       trigger={
         <Button type="button" variant="outline">
           <GroupIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+          {/* TODO: After sending req once Disable the button and change the text to req sent  */}
           Join Group
         </Button>
       }

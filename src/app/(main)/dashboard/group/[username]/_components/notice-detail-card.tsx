@@ -15,6 +15,7 @@ interface NoticeCardProps {
   createdAt: Date;
   groupUsername: string;
   noticeId: string;
+  isAdmin: boolean;
 }
 
 export const NoticeDetailCard = ({
@@ -25,6 +26,7 @@ export const NoticeDetailCard = ({
   username,
   groupUsername,
   noticeId,
+  isAdmin,
 }: NoticeCardProps) => {
   const router = useRouter();
   return (
@@ -43,15 +45,18 @@ export const NoticeDetailCard = ({
             </div>
           </div>
 
-          {/* TODO: only show for admins */}
-          <Button
-            variant="secondary"
-            className="space-x-2"
-            onClick={() => router.push(`/dashboard/group/${groupUsername}/admin/edit/${noticeId}`)}
-          >
-            <PencilIcon className="h-4 w-4" />
-            <span>Edit</span>
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="secondary"
+              className="space-x-2"
+              onClick={() =>
+                router.push(`/dashboard/group/${groupUsername}/admin/edit/${noticeId}`)
+              }
+            >
+              <PencilIcon className="h-4 w-4" />
+              <span>Edit</span>
+            </Button>
+          )}
         </div>
         <div className="mb-3 ">
           <h1 className="text-2xl font-semibold">{title}</h1>

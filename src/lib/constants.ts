@@ -1,5 +1,4 @@
 export const APP_TITLE = "NoticeBook";
-// TODO: change it to noticebook
 export const DATABASE_PREFIX = "nbc";
 export const EMAIL_SENDER = '"noticebook" <noreply@noticebook.com>';
 

@@ -50,11 +50,7 @@ export const GroupPostEditor = ({ groupId, groupUsername }: GroupPostEditorProps
       { ...values, groupId },
       {
         onSuccess: () => {
-          // TODO: redirect to the post page
           toast.success("Post created successfully!");
-          // goback route
-          // TODO: the back page needs to be refreshed or reloaded
-          // revalidate query data for the group
           // TODO: invalidate the list posts
           router.push(`/dashboard/group/${groupUsername}`);
         },

@@ -17,7 +17,9 @@ export default async function Page({ params }: { params: { username: string } })
     redirect("/dashboard/group");
   }
 
-  // TODO: add check if user is admin
+  if (group.role !== "admin") {
+    redirect("/dashboard");
+  }
 
   return (
     <div>

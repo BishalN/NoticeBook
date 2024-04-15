@@ -25,6 +25,11 @@ export const groupRouter = createTRPCRouter({
     .input(inputs.joinGroupSchema)
     .mutation(({ ctx, input }) => services.createJoinGroupRequest(ctx, input)),
 
+  // checkIfAlreadyRequested
+  checkIfJoinRequested: protectedProcedure
+    .input(inputs.checkIfAlreadyRequestedSchema)
+    .query(({ ctx, input }) => services.checkIfJoinRequested(ctx, input)),
+
   createGroupPost: protectedProcedure
     .input(inputs.createGroupPostSchema)
     .mutation(({ ctx, input }) => services.createGroupPost(ctx, input)),

@@ -128,10 +128,6 @@ export const groupMemberRelations = relations(groupMembers, ({ one }) => ({
 }));
 
 export type GroupMember = typeof groupMembers.$inferSelect;
-// first search the name of the group and send the join request to the group
-// on the backend side, how to handle the join request ?
-// may be create a new table for the join request and then the admin can accept or reject the request
-// TODO: use the similar type of data for the primary key
 
 export const groupJoinRequests = pgTable(
   "group_join_requests",

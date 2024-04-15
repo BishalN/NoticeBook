@@ -33,6 +33,11 @@ export const joinGroupSchema = z.object({
 });
 export type JoinGroupInput = z.infer<typeof joinGroupSchema>;
 
+export const checkIfAlreadyRequestedSchema = z.object({
+  groupId: z.string(),
+});
+export type CheckIfAlreadyRequestedInput = z.infer<typeof checkIfAlreadyRequestedSchema>;
+
 export const leaveGroupSchema = z.object({
   groupId: z.string(),
 });

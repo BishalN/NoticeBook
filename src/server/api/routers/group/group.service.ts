@@ -11,6 +11,7 @@ import {
   type ListGroupPostInput,
   type GetGroupPostInput,
   type GetGroupByUsernameInput,
+  type CheckIfAlreadyRequestedInput,
 } from "./group.input";
 import { generateId } from "lucia";
 import { and, eq, inArray, like, not } from "drizzle-orm";
@@ -61,7 +62,6 @@ export const getGroupByUsername = async (
 };
 
 // Search the group of which the user is not part of
-//TODO: Also avoid showing the group already sent request to join
 export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupInput) => {
   // Search the group with username and user should not be the member of the group
   const groupIds = await ctx.db
@@ -69,19 +69,21 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
     .from(groupMembers)
     .where(eq(groupMembers.userId, ctx.user.id));
 
+  // groups already sent request to join should not be shown
+  const requestedGroupIds = await ctx.db
+    .select({ groupId: groupJoinRequests.groupId })
+    .from(groupJoinRequests)
+    .where(eq(groupJoinRequests.userId, ctx.user.id));
+
+  const noShowGroupIds = groupIds
+    .map((group) => group.id)
+    .concat(requestedGroupIds.map((group) => group.groupId));
+
   const data = await ctx.db
     .select()
     .from(groups)
     .where(
-      and(
-        like(groups.username, `%${input.username}%`),
-        not(
-          inArray(
-            groups.id,
-            groupIds.map((group) => group.id),
-          ),
-        ),
-      ),
+      and(like(groups.username, `%${input.username}%`), not(inArray(groups.id, noShowGroupIds))),
     );
 
   return data;
@@ -94,6 +96,21 @@ export const createJoinGroupRequest = async (ctx: ProtectedTRPCContext, input: J
     groupId: input.groupId,
     message: input.message,
   });
+};
+
+// check if already requested to join the group
+export const checkIfJoinRequested = async (
+  ctx: ProtectedTRPCContext,
+  input: CheckIfAlreadyRequestedInput,
+) => {
+  const isRequested = await ctx.db
+    .select()
+    .from(groupJoinRequests)
+    .where(
+      and(eq(groupJoinRequests.userId, ctx.user.id), eq(groupJoinRequests.groupId, input.groupId)),
+    );
+
+  return isRequested.length > 0;
 };
 
 // createGroupPost
@@ -176,7 +193,6 @@ export const updateGroupPost = async (ctx: ProtectedTRPCContext, input: UpdateGr
       ),
     );
 
-  // TODO: also check if the post is created by the current user
   if (isAdmin.length === 0) {
     throw new Error("You are not allowed to update a post in this group");
   }

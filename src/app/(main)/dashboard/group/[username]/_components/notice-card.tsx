@@ -1,6 +1,5 @@
 "use client";
 
-import { PostPreview } from "@/app/(main)/editor/[postId]/_components/post-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -17,6 +16,7 @@ interface NoticeCardProps {
   groupUsername: string;
   noticeId: string;
   groupId: string;
+  isAdmin: boolean;
 }
 
 export const NoticeCard = ({
@@ -28,6 +28,7 @@ export const NoticeCard = ({
   groupUsername,
   noticeId,
   groupId,
+  isAdmin,
 }: NoticeCardProps) => {
   const router = useRouter();
   return (
@@ -46,21 +47,22 @@ export const NoticeCard = ({
             </div>
           </div>
 
-          {/* TODO: only show for admins */}
-          <div className="space-x-3">
-            <Button
-              variant="secondary"
-              className="space-x-2"
-              onClick={() =>
-                router.push(`/dashboard/group/${groupUsername}/admin/edit/${noticeId}`)
-              }
-            >
-              <PencilIcon className="h-4 w-4" />
-              <span>Edit</span>
-            </Button>
+          {isAdmin && (
+            <div className="space-x-3">
+              <Button
+                variant="secondary"
+                className="space-x-2"
+                onClick={() =>
+                  router.push(`/dashboard/group/${groupUsername}/admin/edit/${noticeId}`)
+                }
+              >
+                <PencilIcon className="h-4 w-4" />
+                <span>Edit</span>
+              </Button>
 
-            <ConfirmGroupPostDelete groupId={groupId} postId={noticeId} />
-          </div>
+              <ConfirmGroupPostDelete groupId={groupId} postId={noticeId} />
+            </div>
+          )}
         </div>
         <div className="mb-3">
           <h1 className="text-2xl font-semibold">{title}</h1>
