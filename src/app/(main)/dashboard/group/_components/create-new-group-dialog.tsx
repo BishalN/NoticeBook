@@ -20,6 +20,7 @@ import { PlusIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export const CreateGroupDialog = () => {
   const router = useRouter();
@@ -35,14 +36,17 @@ export const CreateGroupDialog = () => {
   const onSubmit = form.handleSubmit(async (values) => {
     await createGroup.mutateAsync(values, {
       onSuccess: () => {
-        // TODO: show a toast here
-        console.log("Group created successfully");
+        toast.success("Group created successfully");
         router.refresh();
       },
+      onError: (error) => {
+        toast.error(error.message);
+      },
     });
-    // close the dialog and refresh the router here
+    // TODO: close the dialog and refresh the router here
   });
 
+  // TODO: show error message inside of the fields e.g username is already taken
   return (
     <ResponsiveDialog
       trigger={
@@ -65,7 +69,7 @@ export const CreateGroupDialog = () => {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
-
+                <FormDescription>It has to be unique</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

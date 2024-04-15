@@ -2,19 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileTextIcon, CreditCard, GearIcon, GroupIcon } from "@/components/icons";
+import { CreditCard, GearIcon, GroupIcon } from "@/components/icons";
 
 import { cn } from "@/lib/utils";
 
 const items = [
   {
-    title: "Posts",
-    href: "/dashboard",
-    icon: FileTextIcon,
-  },
-  {
     title: "Groups",
-    href: "/dashboard/group",
+    href: "/dashboard",
     icon: GroupIcon,
   },
   {

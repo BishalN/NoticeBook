@@ -7,7 +7,7 @@ import {
   timestamp,
   varchar,
   uniqueIndex,
-  uuid,
+  serial,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 
@@ -17,7 +17,7 @@ export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 export const users = pgTable(
   "users",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: varchar("id", { length: 21 }).primaryKey(),
     discordId: varchar("discord_id", { length: 255 }).unique(),
     email: varchar("email", { length: 255 }).unique().notNull(),
     emailVerified: boolean("email_verified").default(false).notNull(),
@@ -42,7 +42,7 @@ export type NewUser = typeof users.$inferInsert;
 export const sessions = pgTable(
   "sessions",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: varchar("id", { length: 255 }).primaryKey(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
   },
@@ -54,7 +54,7 @@ export const sessions = pgTable(
 export const emailVerificationCodes = pgTable(
   "email_verification_codes",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: serial("id").primaryKey(),
     userId: varchar("user_id", { length: 21 }).unique().notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     code: varchar("code", { length: 8 }).notNull(),
@@ -69,7 +69,7 @@ export const emailVerificationCodes = pgTable(
 export const passwordResetTokens = pgTable(
   "password_reset_tokens",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: varchar("id", { length: 40 }).primaryKey(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
   },
@@ -78,41 +78,10 @@ export const passwordResetTokens = pgTable(
   }),
 );
 
-export const posts = pgTable(
-  "posts",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: varchar("user_id", { length: 255 }).notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
-    excerpt: varchar("excerpt", { length: 255 }).notNull(),
-    content: text("content").notNull(),
-    status: varchar("status", { length: 10, enum: ["draft", "published"] })
-      .default("draft")
-      .notNull(),
-    tags: varchar("tags", { length: 255 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
-  },
-  (t) => ({
-    userIdx: index("post_user_idx").on(t.userId),
-    createdAtIdx: index("post_created_at_idx").on(t.createdAt),
-  }),
-);
-
-export const postRelations = relations(posts, ({ one }) => ({
-  user: one(users, {
-    fields: [posts.userId],
-    references: [users.id],
-  }),
-}));
-
-export type Post = typeof posts.$inferSelect;
-export type NewPost = typeof posts.$inferInsert;
-
 export const groups = pgTable(
   "groups",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: varchar("id", { length: 15 }).primaryKey(),
     username: varchar("username", { length: 255 }).notNull().unique(),
     description: varchar("description", { length: 255 }).notNull(),
     avatar: varchar("avatar", { length: 255 }),
@@ -129,8 +98,7 @@ export type Group = typeof groups.$inferSelect;
 export const groupMembers = pgTable(
   "group_members",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-
+    id: varchar("id", { length: 15 }).primaryKey(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     groupId: varchar("group_id", { length: 21 }).notNull(),
     role: varchar("role", { length: 10, enum: ["member", "admin"] })
@@ -168,8 +136,7 @@ export type GroupMember = typeof groupMembers.$inferSelect;
 export const groupJoinRequests = pgTable(
   "group_join_requests",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-
+    id: varchar("id", { length: 15 }).primaryKey(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     groupId: varchar("group_id", { length: 21 }).notNull(),
     message: text("message"),
@@ -193,8 +160,7 @@ export const groupJoinRequests = pgTable(
 export const groupPosts = pgTable(
   "group_posts",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-
+    id: varchar("id", { length: 15 }).primaryKey(),
     groupId: varchar("group_id", { length: 21 }).notNull(),
     userId: varchar("user_id", { length: 21 }).notNull(),
     title: varchar("title", { length: 255 }).notNull(),

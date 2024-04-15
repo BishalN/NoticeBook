@@ -26,9 +26,10 @@ const markdownlink = "https://remarkjs.github.io/react-markdown/";
 
 interface GroupPostEditorProps {
   groupId: string;
+  groupUsername: string;
 }
 
-export const GroupPostEditor = ({ groupId }: GroupPostEditorProps) => {
+export const GroupPostEditor = ({ groupId, groupUsername }: GroupPostEditorProps) => {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const createPost = api.group.createGroupPost.useMutation();
@@ -53,7 +54,9 @@ export const GroupPostEditor = ({ groupId }: GroupPostEditorProps) => {
           toast.success("Post created successfully!");
           // goback route
           // TODO: the back page needs to be refreshed or reloaded
-          router.back();
+          // revalidate query data for the group
+          // TODO: invalidate the list posts
+          router.push(`/dashboard/group/${groupUsername}`);
         },
         onError: (err) => {
           toast.error(err.message);

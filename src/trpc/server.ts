@@ -1,11 +1,7 @@
 import "server-only";
 
-import {
-  createTRPCProxyClient,
-  loggerLink,
-  TRPCClientError,
-} from "@trpc/client";
-import { callProcedure } from "@trpc/server";
+import { createTRPCProxyClient, loggerLink, TRPCClientError } from "@trpc/client";
+import { callProcedure, initTRPC } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { type TRPCErrorResponse } from "@trpc/server/rpc";
 import { cache } from "react";

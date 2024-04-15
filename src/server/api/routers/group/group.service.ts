@@ -32,6 +32,8 @@ export const myGroups = async (ctx: ProtectedTRPCContext) => {
 
 export const createGroup = async (ctx: ProtectedTRPCContext, input: CreateGroupInput) => {
   const id = generateId(15);
+  // TODO: handle error properly e.g username already taken
+
   await ctx.db.transaction(async (db) => {
     await db.insert(groups).values({
       id,
@@ -40,6 +42,7 @@ export const createGroup = async (ctx: ProtectedTRPCContext, input: CreateGroupI
     });
 
     await db.insert(groupMembers).values({
+      id,
       userId: ctx.user.id,
       groupId: id,
       role: "admin",
@@ -86,6 +89,7 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
 
 export const createJoinGroupRequest = async (ctx: ProtectedTRPCContext, input: JoinGroupInput) => {
   await ctx.db.insert(groupJoinRequests).values({
+    id: generateId(15),
     userId: ctx.user.id,
     groupId: input.groupId,
     message: input.message,

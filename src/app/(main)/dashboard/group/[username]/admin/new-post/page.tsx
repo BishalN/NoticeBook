@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: { username: string } })
     <div>
       <h1 className="text-3xl font-bold">{params.username}</h1>
 
-      <GroupPostEditor groupId={group.id} />
+      <GroupPostEditor groupId={group.id} groupUsername={params.username} />
     </div>
   );
 }
