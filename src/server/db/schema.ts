@@ -229,3 +229,27 @@ export const groupInviteRelations = relations(groupInvites, ({ one }) => ({
     references: [groups.id],
   }),
 }));
+
+export const fcmTokens = pgTable(
+  "fcm_tokens",
+  {
+    id: varchar("id", { length: 21 }).primaryKey(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    fcmToken: varchar("fcm_token", { length: 255 }).notNull().unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    userIdx: index("fcm_token_user_idx").on(t.userId),
+  }),
+);
+
+export type FcmToken = typeof fcmTokens.$inferSelect;
+
+// one user can have many fcm tokens
+export const fcmTokenRelations = relations(fcmTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [fcmTokens.userId],
+    references: [users.id],
+  }),
+}));

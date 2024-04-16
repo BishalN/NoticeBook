@@ -8,6 +8,7 @@ import React from "react";
 import { CreateGroupDialog } from "./_components/create-new-group-dialog";
 import { JoinGroupDialog } from "./_components/join-group-dialog";
 import { GroupCard } from "./_components/group-card";
+import { NotificationManager } from "./_components/notification-manager";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -38,6 +39,7 @@ export default async function GroupPage({ searchParams }: Props) {
           <h1 className="text-3xl font-bold md:text-4xl">Groups</h1>
           <p className="text-sm text-muted-foreground">Manage your account groups</p>
         </div>
+        <NotificationManager />
         <div className="space-x-3">
           <CreateGroupDialog />
           <JoinGroupDialog />

@@ -32,6 +32,8 @@ import {
 import { generateId } from "lucia";
 import { and, eq, inArray, ilike, not } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { getMessaging } from "firebase/messaging";
+import { firebase_admin } from "../firebase-admin";
 
 export const listGroups = async (ctx: ProtectedTRPCContext, input: ListGroupsInput) => {
   return ctx.db.query.groups.findMany({
@@ -158,6 +160,51 @@ export const createGroupPost = async (ctx: ProtectedTRPCContext, input: CreateGr
     excerpt: input.excerpt,
     userId: ctx.user.id,
   });
+
+  // TODO: send notification to all users in the group
+  // Do this may be in a worker or a separate service
+  // or in a cron job
+  // const relatedTokens =
+  // find all the tokens of the users in the group
+  // send notification to all the tokens
+  const relatedUserIds = await ctx.db.query.groupMembers.findMany({
+    where: (table, { eq }) => eq(table.groupId, input.groupId),
+    with: { user: { columns: { id: true } } },
+  });
+
+  const relatedTokens = await ctx.db.query.fcmTokens.findMany({
+    where: (table, { inArray }) =>
+      inArray(
+        table.userId,
+        relatedUserIds.map((user) => user.user.id),
+      ),
+  });
+
+  const message = {
+    title: input.title,
+    excerpt: input.excerpt,
+    postId: id,
+    groupId: input.groupId,
+  };
+
+  void firebase_admin
+    .messaging()
+    .sendEachForMulticast({
+      tokens: relatedTokens.map((token) => token.fcmToken),
+      webpush: {
+        notification: {
+          title: input.title,
+          body: input.excerpt,
+        },
+      },
+      data: message,
+      notification: {
+        title: input.title,
+      },
+    })
+    .then((res) => {
+      console.log("Notification sent", res);
+    });
 };
 
 export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroupPostInput) => {
