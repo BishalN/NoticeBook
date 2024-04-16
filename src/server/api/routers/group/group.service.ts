@@ -50,7 +50,16 @@ export const myGroups = async (ctx: ProtectedTRPCContext) => {
 
 export const createGroup = async (ctx: ProtectedTRPCContext, input: CreateGroupInput) => {
   const id = generateId(15);
-  // TODO: handle error properly e.g username already taken
+  //TODO:  Pattern Ask for permission or forgiveness delima here
+  // Use ask for forgiveness pattern rather than permission here
+
+  const group = await ctx.db.query.groups.findFirst({
+    where: (table, { eq }) => eq(table.username, input.username),
+  });
+
+  if (group) {
+    throw new TRPCError({ message: "Username already taken", code: "CONFLICT", cause: "username" });
+  }
 
   await ctx.db.transaction(async (db) => {
     await db.insert(groups).values({
@@ -157,7 +166,10 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
   });
 
   if (!isMember) {
-    throw new Error("Unauthorized to view the posts of this group");
+    throw new TRPCError({
+      message: "Unauthorized to view the posts of this group",
+      code: "UNAUTHORIZED",
+    });
   }
 
   return ctx.db.query.groupPosts.findMany({
@@ -175,7 +187,10 @@ export const getGroupPost = async (ctx: ProtectedTRPCContext, input: GetGroupPos
   });
 
   if (!isMember) {
-    throw new Error("Unauthorized to view the post of a group that you're not part of");
+    throw new TRPCError({
+      message: "Unauthorized to view the post of a group that you're not part of",
+      code: "UNAUTHORIZED",
+    });
   }
 
   return ctx.db.query.groupPosts.findFirst({
@@ -211,12 +226,10 @@ export const createGroupInvite = async (
 ) => {
   await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
-  // check if the invite link already exists for the group which is valid
   const groupInvite = await ctx.db.query.groupInvites.findFirst({
     where: (invite, { eq, and }) =>
       and(eq(invite.groupId, input.groupId), eq(invite.status, "valid")),
   });
-  // TODO: handle this may be differently
   if (groupInvite) return groupInvite;
 
   const inviteLink = generateId(15);
@@ -350,7 +363,6 @@ export const promoteUser = async (ctx: ProtectedTRPCContext, input: PromoteUserI
   // or just try and catch the error and return a message
   // Similar pattern needs to be followed in other functions
   // don't just consider the happy path handle all possible cases
-
   await ctx.db
     .update(groupMembers)
     .set({ role: "admin" })

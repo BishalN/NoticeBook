@@ -1,5 +1,8 @@
 "use client";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
 import { CopyToClipboard } from "@/app/(landing)/_components/copy-to-clipboard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +20,8 @@ import { PencilIcon, ReplaceIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmUserPromotion } from "./confirm-promote-user-alert-dialog";
 import { RemoveUserAlertDialog } from "./remove-user-alert-dialog";
+
+dayjs.extend(relativeTime);
 
 interface InviteAndManageUsersTabs {
   group: {
@@ -243,8 +248,7 @@ export const RequestCard = ({
           >
             Reject
           </Button>
-          {/*TODO:  Use relative time here */}
-          <div className="text-muted-foreground">{group.requestedAt.toLocaleDateString()}</div>
+          <div className="text-muted-foreground">{dayjs(group.requestedAt).fromNow()}</div>
         </div>
       </CardHeader>
     </Card>
