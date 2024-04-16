@@ -16,6 +16,8 @@ import { api } from "@/trpc/react";
 import { Crown, MinusIcon, PencilIcon, ReplaceIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ConfirmUserPromotion } from "./confirm-promote-user-alert-dialog";
+import { RemoveUserAlertDialog } from "./remove-user-alert-dialog";
 
 interface InviteAndManageUsersTabs {
   group: {
@@ -25,6 +27,8 @@ interface InviteAndManageUsersTabs {
     id: string;
   };
 }
+
+// TODO: maintain the tab switch using a query param so that it does not change always
 export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
   const router = useRouter();
   const { data: inviteData, isLoading: inviteDataLoading } = api.group.getInvite.useQuery({
@@ -154,6 +158,8 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
                   isAdmin={member.role === "admin"}
                   isMe={false}
                   username={member.user.email}
+                  groupId={member.groupId}
+                  userId={member.userId}
                 />
               ))}
             </div>
@@ -242,11 +248,15 @@ export const UserCard = ({
   avatar,
   isMe,
   isAdmin,
+  userId,
+  groupId,
 }: {
   username: string;
   avatar: string;
   isMe: boolean;
   isAdmin: boolean;
+  userId: string;
+  groupId: string;
 }) => {
   return (
     <div className="flex items-center justify-between space-x-3">
@@ -263,12 +273,9 @@ export const UserCard = ({
             <PencilIcon />
           </Button>
         )}
-        <Button variant={isAdmin ? "destructive" : "default"}>
-          <Crown />
-        </Button>
-        <Button>
-          <MinusIcon />
-        </Button>
+        <ConfirmUserPromotion isAdmin={isAdmin} groupId={groupId} userId={userId} />
+
+        <RemoveUserAlertDialog isAdmin={isAdmin} groupId={groupId} userId={userId} />
       </div>
     </div>
   );

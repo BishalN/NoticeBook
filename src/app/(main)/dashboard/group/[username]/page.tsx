@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { NoticeCard } from "./_components/notice-card";
+import { LeaveGroupAlertDialog } from "./_components/leave-group-alert-dialog";
 
 export default async function Page({ params }: { params: { username: string } }) {
   // Redirect if user not member of the group
@@ -20,6 +21,7 @@ export default async function Page({ params }: { params: { username: string } })
     <div>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold">{params.username}</h1>
+        {group.role === "member" && <LeaveGroupAlertDialog groupId={group.groupId} />}
         {group.role === "admin" && (
           <Link href={`/dashboard/group/${params.username}/admin`} passHref>
             <Button className="space-x-2" variant="secondary">

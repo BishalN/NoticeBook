@@ -81,4 +81,17 @@ export const groupRouter = createTRPCRouter({
   getMembers: protectedProcedure
     .input(inputs.getMembersSchema)
     .query(({ ctx, input }) => services.getMembers(ctx, input)),
+
+  // TODO: add a demote user who to turn admins to user which only the superadmin can do
+  promoteUser: protectedProcedure
+    .input(inputs.promoteUserSchema)
+    .mutation(({ ctx, input }) => services.promoteUser(ctx, input)),
+
+  removeUser: protectedProcedure
+    .input(inputs.removeUserSchema)
+    .mutation(({ ctx, input }) => services.removeUser(ctx, input)),
+
+  leaveGroup: protectedProcedure
+    .input(inputs.leaveGroupSchema)
+    .mutation(({ ctx, input }) => services.leaveGroup(ctx, input)),
 });

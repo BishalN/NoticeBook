@@ -25,6 +25,9 @@ import {
   type GetMembersInput,
   type RejectJoinRequestInput,
   type AcceptJoinRequestInput,
+  type PromoteUserInput,
+  type RemoveUserInput,
+  type LeaveGroupInput,
 } from "./group.input";
 import { generateId } from "lucia";
 import { and, eq, inArray, like, not } from "drizzle-orm";
@@ -83,10 +86,22 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
     .where(eq(groupMembers.userId, ctx.user.id));
 
   // groups already sent request to join should not be shown
+  // whose `status` is `pending` or `accepted` in the `groupJoinRequests` table
+  // otherwise so even if once rejected
   const requestedGroupIds = await ctx.db
     .select({ groupId: groupJoinRequests.groupId })
     .from(groupJoinRequests)
-    .where(eq(groupJoinRequests.userId, ctx.user.id));
+    .where(
+      and(
+        eq(groupJoinRequests.userId, ctx.user.id),
+        inArray(groupJoinRequests.status, ["pending", "accepted"]),
+      ),
+    );
+
+  // const requestedGroupIds = await ctx.db
+  //   .select({ groupId: groupJoinRequests.groupId })
+  //   .from(groupJoinRequests)
+  //   .where(eq(groupJoinRequests.userId, ctx.user.id));
 
   const noShowGroupIds = groupIds
     .map((group) => group.id)
@@ -108,6 +123,8 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
   }
 };
 
+// TODO: user should be able to send request even after once rejected currently not possible
+// due to db constraint probably
 export const createJoinGroupRequest = async (ctx: ProtectedTRPCContext, input: JoinGroupInput) => {
   await ctx.db.insert(groupJoinRequests).values({
     id: generateId(15),
@@ -431,6 +448,7 @@ export const acceptJoinRequest = async (
   ctx: ProtectedTRPCContext,
   input: AcceptJoinRequestInput,
 ) => {
+  // TODO: use a middleware to check if the user is the admin of the group
   const isAdmin = await ctx.db
     .select()
     .from(groupMembers)
@@ -479,4 +497,59 @@ export const getMembers = async (ctx: ProtectedTRPCContext, input: GetMembersInp
     where: (table, { eq }) => eq(table.groupId, input.groupId),
     with: { user: { columns: { avatar: true, email: true } } },
   });
+};
+
+export const promoteUser = async (ctx: ProtectedTRPCContext, input: PromoteUserInput) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to promote the member");
+  }
+
+  // TODO: may be check if the user is the member of the group first\
+  // or just try and catch the error and return a message
+  // Similar pattern needs to be followed in other functions
+  // don't just consider the happy path handle all possible cases
+
+  await ctx.db
+    .update(groupMembers)
+    .set({ role: "admin" })
+    .where(and(eq(groupMembers.groupId, input.groupId), eq(groupMembers.userId, input.userId)));
+};
+
+export const removeUser = async (ctx: ProtectedTRPCContext, input: RemoveUserInput) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new Error("You are not allowed to remove the member");
+  }
+
+  await ctx.db
+    .delete(groupMembers)
+    .where(and(eq(groupMembers.groupId, input.groupId), eq(groupMembers.userId, input.userId)));
+};
+
+export const leaveGroup = async (ctx: ProtectedTRPCContext, input: LeaveGroupInput) => {
+  // TODO: similar check if the member of the group or just let it fail and catch the error
+  await ctx.db
+    .delete(groupMembers)
+    .where(and(eq(groupMembers.groupId, input.groupId), eq(groupMembers.userId, ctx.user.id)));
 };

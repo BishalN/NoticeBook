@@ -145,6 +145,7 @@ export const groupJoinRequests = pgTable(
   (t) => ({
     userIdx: index("group_join_request_user_idx").on(t.userId),
     groupIdx: index("group_join_request_group_idx").on(t.groupId),
+    // TODO: remove this index in the light of users can send request even after being rejected
     userGroupIdx: uniqueIndex("group_join_request_user_group_idx").on(t.userId, t.groupId),
   }),
 );

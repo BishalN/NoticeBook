@@ -38,11 +38,6 @@ export const checkIfAlreadyRequestedSchema = z.object({
 });
 export type CheckIfAlreadyRequestedInput = z.infer<typeof checkIfAlreadyRequestedSchema>;
 
-export const leaveGroupSchema = z.object({
-  groupId: z.string(),
-});
-export type LeaveGroupInput = z.infer<typeof leaveGroupSchema>;
-
 export const listGroupsSchema = z.object({
   page: z.number().int().default(1),
   perPage: z.number().int().default(12),
@@ -147,3 +142,20 @@ export const updateMemberSchema = z.object({
   role: z.enum(["admin", "member"]),
 });
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
+
+export const promoteUserSchema = z.object({
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type PromoteUserInput = z.infer<typeof promoteUserSchema>;
+
+export const removeUserSchema = z.object({
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type RemoveUserInput = z.infer<typeof removeUserSchema>;
+
+export const leaveGroupSchema = z.object({
+  groupId: z.string(),
+});
+export type LeaveGroupInput = z.infer<typeof leaveGroupSchema>;
