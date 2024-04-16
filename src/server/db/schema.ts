@@ -78,6 +78,7 @@ export const passwordResetTokens = pgTable(
   }),
 );
 
+// TODO: username should not allow special characters, spaces etc
 export const groups = pgTable(
   "groups",
   {

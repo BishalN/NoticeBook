@@ -43,7 +43,7 @@ export const GroupPostEditor = ({ groupId, groupUsername }: GroupPostEditorProps
     resolver: zodResolver(createGroupPostSchema),
   });
 
-  console.log(form.formState.errors);
+  const utils = api.useContext();
 
   const onSubmit = form.handleSubmit(async (values) => {
     createPost.mutate(
@@ -51,7 +51,7 @@ export const GroupPostEditor = ({ groupId, groupUsername }: GroupPostEditorProps
       {
         onSuccess: () => {
           toast.success("Post created successfully!");
-          // TODO: invalidate the list posts
+          void utils.group.listPosts.invalidate();
           router.push(`/dashboard/group/${groupUsername}`);
         },
         onError: (err) => {
@@ -137,7 +137,6 @@ export const GroupPostEditor = ({ groupId, groupUsername }: GroupPostEditorProps
           />
           <Button
             onClick={() => {
-              console.log("req submitted");
               formRef.current?.requestSubmit();
             }}
             disabled={!form.formState.isDirty || createPost.isLoading}

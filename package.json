@@ -30,6 +30,7 @@
     "@react-email/render": "^0.0.10",
     "@t3-oss/env-nextjs": "^0.7.1",
     "@tanstack/react-query": "^4.36.1",
+    "@tanstack/react-query-devtools": "^5.29.2",
     "@tiptap/extension-highlight": "^2.3.0",
     "@tiptap/extension-list-item": "^2.3.0",
     "@tiptap/extension-text-style": "^2.3.0",

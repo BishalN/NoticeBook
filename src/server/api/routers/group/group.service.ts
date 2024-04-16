@@ -368,8 +368,10 @@ export const acceptInvite = async (ctx: ProtectedTRPCContext, input: { inviteId:
   }
 
   // check if the user is already part of the group
+  // also need to add and check not just userId but groupId as well
   const isMember = await ctx.db.query.groupMembers.findFirst({
-    where: (table, { eq }) => eq(table.userId, ctx.user.id),
+    where: (table, { eq, and }) =>
+      and(eq(table.userId, ctx.user.id), eq(table.groupId, invite.groupId)),
   });
 
   if (isMember) {

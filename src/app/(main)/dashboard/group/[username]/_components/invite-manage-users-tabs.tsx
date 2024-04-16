@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
-import { Crown, MinusIcon, PencilIcon, ReplaceIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { PencilIcon, ReplaceIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmUserPromotion } from "./confirm-promote-user-alert-dialog";
 import { RemoveUserAlertDialog } from "./remove-user-alert-dialog";
@@ -30,20 +29,23 @@ interface InviteAndManageUsersTabs {
 
 // TODO: maintain the tab switch using a query param so that it does not change always
 export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
-  const router = useRouter();
-  const { data: inviteData, isLoading: inviteDataLoading } = api.group.getInvite.useQuery({
-    groupId: group.id,
-  });
+  const utils = api.useContext();
+  const { data: inviteData, isLoading: inviteDataLoading } = api.group.getInvite.useQuery(
+    {
+      groupId: group.id,
+    },
+    {},
+  );
   const createInvite = api.group.createInvite.useMutation({
     onSuccess: () => {
       toast.success("Invite link created");
+      void utils.group.getInvite.invalidate();
     },
   });
   const revalidateInvite = api.group.revalidateInvite.useMutation({
     onSuccess: () => {
       toast.success("Invite link revalidated");
-      // TODO: invalidate the getInvite query
-      router.refresh(); // this is hack to revalidate the query for now
+      void utils.group.getInvite.invalidate();
     },
   });
 
@@ -183,9 +185,12 @@ export const RequestCard = ({
     userId: string;
   };
 }) => {
+  const utils = api.useContext();
+
   const rejectJoinRequest = api.group.rejectJoinRequest.useMutation({
     onSuccess: () => {
       toast.success("Request rejected successfully");
+      void utils.group.getJoinRequests.invalidate();
     },
     onError: () => {
       toast.error("Failed to update request");
@@ -195,6 +200,8 @@ export const RequestCard = ({
   const acceptJoinRequest = api.group.acceptJoinRequest.useMutation({
     onSuccess: () => {
       toast.success("Request accepted successfully");
+      void utils.group.getJoinRequests.invalidate();
+      void utils.group.getMembers.invalidate();
     },
     onError: () => {
       toast.error("Failed to update request");
@@ -236,6 +243,7 @@ export const RequestCard = ({
           >
             Reject
           </Button>
+          {/*TODO:  Use relative time here */}
           <div className="text-muted-foreground">{group.requestedAt.toLocaleDateString()}</div>
         </div>
       </CardHeader>

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,12 +20,9 @@ export const JoinGroupDialog = () => {
   );
   const createJoinRequest = api.group.createJoinRequest.useMutation();
 
-  // const {data} = api.group.checkIfJoinRequested.useQuery({groupId: group.id})
-
-  const router = useRouter();
+  const utils = api.useContext();
 
   const handleJoinGroupRequest = async (groupId: string) => {
-    // check if already sending the request
     if (createJoinRequest.isLoading) {
       return;
     }
@@ -35,24 +31,22 @@ export const JoinGroupDialog = () => {
       {
         onSuccess: () => {
           toast.success("Request sent successfully");
+          void utils.group.search.invalidate();
         },
         onError: () => {
           toast.error("Failed to send request");
         },
-        onSettled: () => {
-          // close the dialog
-          router.refresh();
-        },
       },
     );
   };
+
+  // TODO: close the dialog aftger request sent
 
   return (
     <ResponsiveDialog
       trigger={
         <Button type="button" variant="outline">
           <GroupIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-          {/* TODO: After sending req once Disable the button and change the text to req sent  */}
           Join Group
         </Button>
       }

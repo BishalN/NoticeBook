@@ -24,10 +24,11 @@ interface RemoveUserAlertDialogProps {
 
 export function RemoveUserAlertDialog({ isAdmin, groupId, userId }: RemoveUserAlertDialogProps) {
   const [open, setOpen] = useState(false);
+  const utils = api.useContext();
   const removeUser = api.group.removeUser.useMutation({
     onSuccess: () => {
       toast.success("User removed from the group");
-      // TODO: invalidate the getMembers query
+      void utils.group.getMembers.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);

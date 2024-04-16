@@ -24,10 +24,11 @@ interface ConfirmUserPromotionProps {
 
 export function ConfirmUserPromotion({ isAdmin, groupId, userId }: ConfirmUserPromotionProps) {
   const [open, setOpen] = useState(false);
+  const utils = api.useContext();
   const promoteUser = api.group.promoteUser.useMutation({
     onSuccess: () => {
       toast.success("User promoted to admin");
-      // TODO: invalidate the getMembers query
+      void utils.group.getMembers.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);

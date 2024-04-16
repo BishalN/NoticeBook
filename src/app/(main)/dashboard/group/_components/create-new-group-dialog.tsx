@@ -23,7 +23,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export const CreateGroupDialog = () => {
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const createGroup = api.group.create.useMutation();
   const form = useForm({
@@ -33,17 +32,18 @@ export const CreateGroupDialog = () => {
     },
     resolver: zodResolver(createGroupSchema),
   });
+  const utils = api.useContext();
   const onSubmit = form.handleSubmit(async (values) => {
     await createGroup.mutateAsync(values, {
       onSuccess: () => {
         toast.success("Group created successfully");
-        router.refresh();
+        void utils.group.myGroups.invalidate();
+        // TODO: close the dialog
       },
       onError: (error) => {
         toast.error(error.message);
       },
     });
-    // TODO: close the dialog and refresh the router here
   });
 
   // TODO: show error message inside of the fields e.g username is already taken
@@ -52,7 +52,7 @@ export const CreateGroupDialog = () => {
       trigger={
         <Button type="button" variant="secondary">
           <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-          New Project
+          New Group
         </Button>
       }
       title="Create a new group"
