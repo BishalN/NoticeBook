@@ -29,7 +29,6 @@ export default async function GroupPage({ searchParams }: Props) {
     redirect("/signin");
   }
 
-  // get the mygroups data
   const myGroups = Promise.all([api.group.myGroups.query()]);
 
   return (

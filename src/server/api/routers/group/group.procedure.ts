@@ -1,3 +1,4 @@
+import { groupMembers } from "@/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import * as inputs from "./group.input";
 import * as services from "./group.service";

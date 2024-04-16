@@ -30,7 +30,8 @@ import {
   type LeaveGroupInput,
 } from "./group.input";
 import { generateId } from "lucia";
-import { and, eq, inArray, like, not } from "drizzle-orm";
+import { and, eq, inArray, ilike, not } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const listGroups = async (ctx: ProtectedTRPCContext, input: ListGroupsInput) => {
   return ctx.db.query.groups.findMany({
@@ -67,7 +68,6 @@ export const createGroup = async (ctx: ProtectedTRPCContext, input: CreateGroupI
   });
 };
 
-// getbyusername
 export const getGroupByUsername = async (
   ctx: ProtectedTRPCContext,
   input: GetGroupByUsernameInput,
@@ -77,17 +77,12 @@ export const getGroupByUsername = async (
   });
 };
 
-// Search the group of which the user is not part of
 export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupInput) => {
-  // Search the group with username and user should not be the member of the group
   const groupIds = await ctx.db
     .select({ id: groupMembers.groupId })
     .from(groupMembers)
     .where(eq(groupMembers.userId, ctx.user.id));
 
-  // groups already sent request to join should not be shown
-  // whose `status` is `pending` or `accepted` in the `groupJoinRequests` table
-  // otherwise so even if once rejected
   const requestedGroupIds = await ctx.db
     .select({ groupId: groupJoinRequests.groupId })
     .from(groupJoinRequests)
@@ -98,27 +93,21 @@ export const searchGroup = async (ctx: ProtectedTRPCContext, input: SearchGroupI
       ),
     );
 
-  // const requestedGroupIds = await ctx.db
-  //   .select({ groupId: groupJoinRequests.groupId })
-  //   .from(groupJoinRequests)
-  //   .where(eq(groupJoinRequests.userId, ctx.user.id));
-
   const noShowGroupIds = groupIds
     .map((group) => group.id)
     .concat(requestedGroupIds.map((group) => group.groupId));
 
-  // TODO: make username case insensitive search
   if (noShowGroupIds.length === 0) {
     return ctx.db
       .select()
       .from(groups)
-      .where(and(like(groups.username, `%${input.username}%`)));
+      .where(and(ilike(groups.username, `%${input.username}%`)));
   } else {
     return ctx.db
       .select()
       .from(groups)
       .where(
-        and(like(groups.username, `%${input.username}%`), not(inArray(groups.id, noShowGroupIds))),
+        and(ilike(groups.username, `%${input.username}%`), not(inArray(groups.id, noShowGroupIds))),
       );
   }
 };
@@ -134,7 +123,6 @@ export const createJoinGroupRequest = async (ctx: ProtectedTRPCContext, input: J
   });
 };
 
-// check if already requested to join the group
 export const checkIfJoinRequested = async (
   ctx: ProtectedTRPCContext,
   input: CheckIfAlreadyRequestedInput,
@@ -149,25 +137,10 @@ export const checkIfJoinRequested = async (
   return isRequested.length > 0;
 };
 
-// createGroupPost
 export const createGroupPost = async (ctx: ProtectedTRPCContext, input: CreateGroupPostInput) => {
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
+
   const id = generateId(15);
-
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to create a post in this group");
-  }
-
   await ctx.db.insert(groupPosts).values({
     id,
     groupId: input.groupId,
@@ -178,7 +151,6 @@ export const createGroupPost = async (ctx: ProtectedTRPCContext, input: CreateGr
   });
 };
 
-// listGroupPosts
 export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroupPostInput) => {
   const isMember = await ctx.db.query.groupMembers.findFirst({
     where: (table, { eq }) => eq(table.userId, ctx.user.id),
@@ -188,10 +160,6 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
     throw new Error("Unauthorized to view the posts of this group");
   }
 
-  console.log(`groupId is ${input.groupId}`);
-
-  // expand the userId to get the user details
-  // use the with option to get the user details
   return ctx.db.query.groupPosts.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),
     offset: (input.page - 1) * input.perPage,
@@ -201,7 +169,6 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
   });
 };
 
-// getGroupPost
 export const getGroupPost = async (ctx: ProtectedTRPCContext, input: GetGroupPostInput) => {
   const isMember = await ctx.db.query.groupMembers.findFirst({
     where: (table, { eq }) => eq(table.userId, ctx.user.id),
@@ -216,60 +183,19 @@ export const getGroupPost = async (ctx: ProtectedTRPCContext, input: GetGroupPos
   });
 };
 
-// updateGroupPost
 export const updateGroupPost = async (ctx: ProtectedTRPCContext, input: UpdateGroupPostInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to update a post in this group");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
   await ctx.db.update(groupPosts).set(input).where(eq(groupPosts.id, input.id));
 };
 
-// deleteGroupPost
 export const deleteGroupPost = async (ctx: ProtectedTRPCContext, input: DeleteGroupPostInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to delete a post in this group");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   await ctx.db.delete(groupPosts).where(eq(groupPosts.id, input.postId));
 };
 
 export const getGroupInvite = async (ctx: ProtectedTRPCContext, input: GetGroupInviteInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to get the invite link");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   const groupInvite = await ctx.db.query.groupInvites.findFirst({
     where: (invite, { eq, and }) =>
@@ -283,20 +209,7 @@ export const createGroupInvite = async (
   ctx: ProtectedTRPCContext,
   input: CreateGroupInviteInput,
 ) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to get the invite link");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   // check if the invite link already exists for the group which is valid
   const groupInvite = await ctx.db.query.groupInvites.findFirst({
@@ -320,29 +233,13 @@ export const createGroupInvite = async (
 };
 
 export const revalidateInvite = async (ctx: ProtectedTRPCContext, input: RevalidateInviteInput) => {
-  // Check if the user is the admin of the group
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to revalidate the invite link");
-  }
-
-  // update the old invite link to invalid
   await ctx.db
     .update(groupInvites)
     .set({ status: "invalid" })
     .where(and(eq(groupInvites.groupId, input.groupId), eq(groupInvites.id, input.oldInviteId)));
 
-  // Generate a new invite link
   const inviteLink = generateId(15);
   const newInvite = await ctx.db
     .insert(groupInvites)
@@ -367,8 +264,6 @@ export const acceptInvite = async (ctx: ProtectedTRPCContext, input: { inviteId:
     };
   }
 
-  // check if the user is already part of the group
-  // also need to add and check not just userId but groupId as well
   const isMember = await ctx.db.query.groupMembers.findFirst({
     where: (table, { eq, and }) =>
       and(eq(table.userId, ctx.user.id), eq(table.groupId, invite.groupId)),
@@ -399,20 +294,7 @@ export const acceptInvite = async (ctx: ProtectedTRPCContext, input: { inviteId:
 };
 
 export const getJoinRequests = async (ctx: ProtectedTRPCContext, input: GetJoinRequestsInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to get the join requests");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   return ctx.db.query.groupJoinRequests.findMany({
     where: (table, { eq, and }) =>
@@ -425,20 +307,7 @@ export const rejectJoinRequest = async (
   ctx: ProtectedTRPCContext,
   input: RejectJoinRequestInput,
 ) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to update the join request");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   await ctx.db
     .update(groupJoinRequests)
@@ -450,21 +319,7 @@ export const acceptJoinRequest = async (
   ctx: ProtectedTRPCContext,
   input: AcceptJoinRequestInput,
 ) => {
-  // TODO: use a middleware to check if the user is the admin of the group
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to update the join request");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   await ctx.db
     .update(groupJoinRequests)
@@ -480,20 +335,7 @@ export const acceptJoinRequest = async (
 };
 
 export const getMembers = async (ctx: ProtectedTRPCContext, input: GetMembersInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to get the members");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   return ctx.db.query.groupMembers.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),
@@ -502,20 +344,7 @@ export const getMembers = async (ctx: ProtectedTRPCContext, input: GetMembersInp
 };
 
 export const promoteUser = async (ctx: ProtectedTRPCContext, input: PromoteUserInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to promote the member");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   // TODO: may be check if the user is the member of the group first\
   // or just try and catch the error and return a message
@@ -529,20 +358,7 @@ export const promoteUser = async (ctx: ProtectedTRPCContext, input: PromoteUserI
 };
 
 export const removeUser = async (ctx: ProtectedTRPCContext, input: RemoveUserInput) => {
-  const isAdmin = await ctx.db
-    .select()
-    .from(groupMembers)
-    .where(
-      and(
-        eq(groupMembers.userId, ctx.user.id),
-        eq(groupMembers.groupId, input.groupId),
-        eq(groupMembers.role, "admin"),
-      ),
-    );
-
-  if (isAdmin.length === 0) {
-    throw new Error("You are not allowed to remove the member");
-  }
+  await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   await ctx.db
     .delete(groupMembers)
@@ -554,4 +370,21 @@ export const leaveGroup = async (ctx: ProtectedTRPCContext, input: LeaveGroupInp
   await ctx.db
     .delete(groupMembers)
     .where(and(eq(groupMembers.groupId, input.groupId), eq(groupMembers.userId, ctx.user.id)));
+};
+
+const checkIfUserIsAdminOfGroup = async (ctx: ProtectedTRPCContext, groupId: string) => {
+  const isAdmin = await ctx.db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.userId, ctx.user.id),
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.role, "admin"),
+      ),
+    );
+
+  if (isAdmin.length === 0) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
 };

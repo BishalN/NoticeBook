@@ -13,6 +13,7 @@ import { toast } from "sonner";
 export const JoinGroupDialog = () => {
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearchTerm = useDebounce(searchValue, 300);
+  const [open, setOpen] = useState(false);
 
   const { data, isLoading } = api.group.search.useQuery(
     { username: debouncedSearchTerm },
@@ -32,6 +33,7 @@ export const JoinGroupDialog = () => {
         onSuccess: () => {
           toast.success("Request sent successfully");
           void utils.group.search.invalidate();
+          setOpen(false);
         },
         onError: () => {
           toast.error("Failed to send request");
@@ -40,10 +42,10 @@ export const JoinGroupDialog = () => {
     );
   };
 
-  // TODO: close the dialog aftger request sent
-
   return (
     <ResponsiveDialog
+      open={open}
+      setOpen={setOpen}
       trigger={
         <Button type="button" variant="outline">
           <GroupIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />

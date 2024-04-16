@@ -18,13 +18,15 @@ import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export const CreateGroupDialog = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const createGroup = api.group.create.useMutation();
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       username: "",
@@ -37,8 +39,11 @@ export const CreateGroupDialog = () => {
     await createGroup.mutateAsync(values, {
       onSuccess: () => {
         toast.success("Group created successfully");
-        void utils.group.myGroups.invalidate();
-        // TODO: close the dialog
+        // TODO: invalidation not working properly
+        void utils.group.myGroups.refetch();
+        setOpen(false);
+        // Hack since invalidate doesn't seem to work here
+        router.refresh();
       },
       onError: (error) => {
         toast.error(error.message);
@@ -49,6 +54,8 @@ export const CreateGroupDialog = () => {
   // TODO: show error message inside of the fields e.g username is already taken
   return (
     <ResponsiveDialog
+      open={open}
+      setOpen={setOpen}
       trigger={
         <Button type="button" variant="secondary">
           <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
