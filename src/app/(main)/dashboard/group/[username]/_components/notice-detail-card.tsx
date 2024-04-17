@@ -7,6 +7,11 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+
 interface NoticeCardProps {
   title: string;
   content: string;
@@ -41,7 +46,7 @@ export const NoticeDetailCard = ({
             <div className="flex flex-col">
               <span className="font-semibold">{username}</span>
               <span className="text-xs text-gray-500">admin</span>
-              <span className="text-xs text-gray-500">{createdAt.toLocaleDateString()}</span>
+              <span className="text-xs text-gray-500">{dayjs(createdAt).fromNow()}</span>
             </div>
           </div>
 

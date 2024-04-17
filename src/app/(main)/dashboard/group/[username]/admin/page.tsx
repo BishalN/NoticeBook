@@ -4,8 +4,15 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { InviteAndManageUsersTabs } from "../_components/invite-manage-users-tabs";
+import { groupAdminTabsSchema } from "@/server/api/routers/group/group.input";
 
-export default async function Page({ params }: { params: { username: string } }) {
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: { username: string };
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
   const groups = await api.group.myGroups.query();
   const group = groups.find((group) => group.group.username === params.username);
 
@@ -16,6 +23,8 @@ export default async function Page({ params }: { params: { username: string } })
   if (group.role !== "admin") {
     redirect("/dashboard");
   }
+
+  const { tab, query } = groupAdminTabsSchema.parse(searchParams);
 
   return (
     <div>
@@ -28,7 +37,7 @@ export default async function Page({ params }: { params: { username: string } })
           </Button>
         </Link>
       </div>
-      <InviteAndManageUsersTabs group={group.group} />
+      <InviteAndManageUsersTabs group={group.group} tab={tab} query={query} />
     </div>
   );
 }

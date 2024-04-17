@@ -11,6 +11,14 @@ import {
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 
+import { uniqueNamesGenerator, type Config, animals, names, colors } from "unique-names-generator";
+
+const customConfig: Config = {
+  dictionaries: [names, colors, animals],
+  separator: "-",
+  length: 3,
+};
+
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
 // TODO: add username field as well or just name field
@@ -21,6 +29,12 @@ export const users = pgTable(
     discordId: varchar("discord_id", { length: 255 }).unique(),
     email: varchar("email", { length: 255 }).unique().notNull(),
     emailVerified: boolean("email_verified").default(false).notNull(),
+    username: varchar("username", { length: 100 })
+      .unique()
+      .notNull()
+      .$defaultFn(() => {
+        return uniqueNamesGenerator(customConfig);
+      }),
     hashedPassword: varchar("hashed_password", { length: 255 }),
     avatar: varchar("avatar", { length: 255 }),
     stripeSubscriptionId: varchar("stripe_subscription_id", { length: 191 }),

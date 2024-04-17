@@ -20,6 +20,10 @@ import { PencilIcon, ReplaceIcon } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmUserPromotion } from "./confirm-promote-user-alert-dialog";
 import { RemoveUserAlertDialog } from "./remove-user-alert-dialog";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import Search from "./search";
 
 dayjs.extend(relativeTime);
 
@@ -30,10 +34,15 @@ interface InviteAndManageUsersTabs {
     description: string;
     id: string;
   };
+  tab: "invite" | "manage";
 }
 
-// TODO: maintain the tab switch using a query param so that it does not change always
-export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
+// TODO: Add search functionality for user management
+export function InviteAndManageUsersTabs({ group, tab }: InviteAndManageUsersTabs) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
   const utils = api.useContext();
   const { data: inviteData, isLoading: inviteDataLoading } = api.group.getInvite.useQuery(
     {
@@ -61,13 +70,34 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
     groupId: group.id,
   });
 
+  const createPageURL = (tab: "invite" | "manage") => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tab);
+    return `${pathname}?${params.toString()}`;
+  };
+
   return (
-    <Tabs defaultValue="invite-users" className="my-3">
+    <Tabs defaultValue={tab} className="my-3">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="manage-users">Manage Users</TabsTrigger>
-        <TabsTrigger value="invite-users">Invite Users</TabsTrigger>
+        <TabsTrigger
+          value="manage"
+          onClick={() => {
+            router.push(createPageURL("manage"));
+          }}
+        >
+          Manage Users
+        </TabsTrigger>
+        <TabsTrigger
+          value="invite"
+          onClick={() => {
+            // update the url search params to tab = invite
+            router.push(createPageURL("invite"));
+          }}
+        >
+          Invite Users
+        </TabsTrigger>
       </TabsList>
-      <TabsContent value="invite-users">
+      <TabsContent value="invite">
         <Card>
           <CardHeader className="flex flex-col items-center justify-center space-y-2">
             <Avatar>
@@ -121,7 +151,7 @@ export function InviteAndManageUsersTabs({ group }: InviteAndManageUsersTabs) {
           )}
         </Card>
       </TabsContent>
-      <TabsContent value="manage-users">
+      <TabsContent value="manage">
         <Card>
           <CardHeader className="flex items-center justify-center">
             <Avatar>

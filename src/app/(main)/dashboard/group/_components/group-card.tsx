@@ -24,7 +24,7 @@ export function GroupCard({ promises }: GroupsProps) {
               className="cursor-pointer"
               key={group.id}
               onClick={() => {
-                router.push(`/dashboard/group/${group.group.username}`);
+                router.push(`/dashboard/group/${group.group.username}?page=1`);
               }}
             >
               <CardHeader>

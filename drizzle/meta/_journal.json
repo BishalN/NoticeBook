@@ -57,6 +57,27 @@
       "when": 1713252278585,
       "tag": "0007_overrated_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1713330594278,
+      "tag": "0008_left_screwball",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1713330792073,
+      "tag": "0009_young_nextwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1713332934751,
+      "tag": "0010_goofy_boom_boom",
+      "breakpoints": true
     }
   ]
 }

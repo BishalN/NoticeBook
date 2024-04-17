@@ -1,5 +1,5 @@
 export const APP_TITLE = "NoticeBook";
-export const DATABASE_PREFIX = "nbc";
+export const DATABASE_PREFIX = "yb";
 export const EMAIL_SENDER = '"noticebook" <noreply@noticebook.com>';
 
 export const redirects = {

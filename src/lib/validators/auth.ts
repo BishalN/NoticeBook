@@ -8,10 +8,8 @@ export type SignupInput = z.infer<typeof signupSchema>;
 
 export const loginSchema = z.object({
   email: z.string().email("Please enter a valid email."),
-  password: z
-    .string()
-    .min(8, "Password is too short. Minimum 8 characters required.")
-    .max(255),
+  // TODO: Change it to 8 characters
+  password: z.string().min(3, "Password is too short. Minimum 3 characters required.").max(255),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 

@@ -7,6 +7,12 @@ import { PencilIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ConfirmGroupPostDelete } from "./group-post-delete-alert-dialog";
 
+// dayjs import and use relative time
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+
 interface NoticeCardProps {
   title: string;
   excerpt: string;
@@ -32,7 +38,7 @@ export const NoticeCard = ({
 }: NoticeCardProps) => {
   const router = useRouter();
   return (
-    <Card>
+    <Card className="shadow-xl">
       <CardHeader>
         <div className="mb-3 flex justify-between space-x-3">
           <div className="flex space-x-3">
@@ -43,7 +49,7 @@ export const NoticeCard = ({
             <div className="flex flex-col">
               <span className="font-semibold">{username}</span>
               <span className="text-xs text-gray-500">admin</span>
-              <span className="text-xs text-gray-500">{createdAt.toLocaleDateString()}</span>
+              <span className="text-xs text-gray-500">{dayjs(createdAt).fromNow()}</span>
             </div>
           </div>
 
@@ -67,15 +73,15 @@ export const NoticeCard = ({
         <div className="mb-3">
           <h1 className="text-2xl font-semibold">{title}</h1>
           <h2 className="text-muted-foreground">{excerpt}</h2>
+          <Button
+            variant="secondary"
+            className="mt-4 space-x-2"
+            onClick={() => router.push(`/dashboard/group/${groupUsername}/notice/${noticeId}`)}
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span>Read More</span>
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          className="space-x-2"
-          onClick={() => router.push(`/dashboard/group/${groupUsername}/notice/${noticeId}`)}
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span>Read More</span>
-        </Button>
       </CardHeader>
     </Card>
   );

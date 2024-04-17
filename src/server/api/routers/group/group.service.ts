@@ -30,7 +30,7 @@ import {
   type LeaveGroupInput,
 } from "./group.input";
 import { generateId } from "lucia";
-import { and, eq, inArray, ilike, not } from "drizzle-orm";
+import { and, eq, inArray, ilike, not, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { getMessaging } from "firebase/messaging";
 import { firebase_admin } from "../firebase-admin";
@@ -219,13 +219,34 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
     });
   }
 
-  return ctx.db.query.groupPosts.findMany({
+  const numOfPosts = await ctx.db
+    .select({
+      postsCount: count(),
+    })
+    .from(groupPosts)
+    .where(eq(groupPosts.groupId, input.groupId));
+
+  console.log(numOfPosts[0]?.postsCount, "post counts");
+
+  const ITEMS_PER_PAGE = 6;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  const totalPages = Math.ceil(numOfPosts[0]?.postsCount / ITEMS_PER_PAGE);
+
+  console.log(totalPages, "total pages");
+
+  const data = await ctx.db.query.groupPosts.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),
-    offset: (input.page - 1) * input.perPage,
-    limit: input.perPage,
+    offset: (input.page - 1) * ITEMS_PER_PAGE,
+    limit: ITEMS_PER_PAGE,
     orderBy: (table, { desc }) => desc(table.createdAt),
-    with: { user: { columns: { avatar: true, email: true } } },
+    with: { user: { columns: { avatar: true, email: true, username: true } } },
   });
+
+  return {
+    data,
+    totalPages,
+  };
 };
 
 export const getGroupPost = async (ctx: ProtectedTRPCContext, input: GetGroupPostInput) => {
@@ -242,6 +263,7 @@ export const getGroupPost = async (ctx: ProtectedTRPCContext, input: GetGroupPos
 
   return ctx.db.query.groupPosts.findFirst({
     where: (table, { eq }) => eq(table.id, input.postId),
+    with: { user: { columns: { avatar: true, email: true } } },
   });
 };
 
@@ -398,7 +420,7 @@ export const getMembers = async (ctx: ProtectedTRPCContext, input: GetMembersInp
   await checkIfUserIsAdminOfGroup(ctx, input.groupId);
 
   return ctx.db.query.groupMembers.findMany({
-    where: (table, { eq }) => eq(table.groupId, input.groupId),
+    where: (table, { eq, and }) => and(eq(table.groupId, input.groupId)),
     with: { user: { columns: { avatar: true, email: true } } },
   });
 };

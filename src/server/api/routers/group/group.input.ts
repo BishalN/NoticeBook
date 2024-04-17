@@ -133,6 +133,7 @@ export type AcceptJoinRequestInput = z.infer<typeof acceptJoinRequestSchema>;
 
 export const getMembersSchema = z.object({
   groupId: z.string(),
+  query: z.string().optional(),
 });
 export type GetMembersInput = z.infer<typeof getMembersSchema>;
 
@@ -159,3 +160,29 @@ export const leaveGroupSchema = z.object({
   groupId: z.string(),
 });
 export type LeaveGroupInput = z.infer<typeof leaveGroupSchema>;
+
+export const defaultPaginationSchema = z.object({
+  page: z.number().int().default(1),
+  perPage: z.number().int().default(12),
+});
+export type DefaultPaginationInput = z.infer<typeof defaultPaginationSchema>;
+
+// rather than throwing error during parsing
+// we can
+
+// accept string and convert to number
+
+export const defaultPaginationSchemaWithStrings = z.object({
+  page: z.string().transform(Number).default("1"),
+  perPage: z.string().transform(Number).default("12"),
+});
+export type DefaultPaginationInputWithStrings = z.infer<typeof defaultPaginationSchemaWithStrings>;
+
+// if transform fails then just use default value dont throw error
+// without using safeparse
+
+export const groupAdminTabsSchema = z.object({
+  tab: z.enum(["invite", "manage"]),
+  query: z.string().optional(),
+});
+export type GroupAdminTabsInput = z.infer<typeof groupAdminTabsSchema>;
