@@ -37,7 +37,7 @@ export default async function Page({
           </Button>
         </Link>
       </div>
-      <InviteAndManageUsersTabs group={group.group} tab={tab} query={query} />
+      <InviteAndManageUsersTabs group={group.group} tab={tab} />
     </div>
   );
 }

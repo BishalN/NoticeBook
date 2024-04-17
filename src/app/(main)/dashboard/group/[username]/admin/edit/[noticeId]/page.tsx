@@ -30,7 +30,11 @@ export default async function Page({ params }: { params: { username: string; not
         <h1>This is edit notice page</h1>
       </div>
 
-      <GroupPostUpdateEditor groupId={group.groupId} notice={notice} />
+      <GroupPostUpdateEditor
+        groupUsername={group.group.username}
+        groupId={group.groupId}
+        notice={notice}
+      />
     </div>
   );
 }

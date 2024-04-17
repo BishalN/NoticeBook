@@ -7,7 +7,7 @@ export const firebase_admin = remember("firebase-admin", () => {
   return admin.initializeApp({
     credential: admin.credential.cert({
       clientEmail: env.FIREBASE_CLIENT_EMAIL,
-      privateKey: env.FIREBASE_PRIVATE_KEY,
+      privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
       projectId: env.FIREBASE_PROJECT_ID,
     }),
   });
