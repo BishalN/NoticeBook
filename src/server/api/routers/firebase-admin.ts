@@ -1,11 +1,15 @@
+import { env } from "@/env";
 import { remember } from "@epic-web/remember";
 
 import admin from "firebase-admin";
-import serviceAccount from "./service_account.json";
 
 export const firebase_admin = remember("firebase-admin", () => {
   return admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+    credential: admin.credential.cert({
+      clientEmail: env.FIREBASE_CLIENT_EMAIL,
+      privateKey: env.FIREBASE_PRIVATE_KEY,
+      projectId: env.FIREBASE_PROJECT_ID,
+    }),
   });
 });
 
