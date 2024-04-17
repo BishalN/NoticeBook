@@ -1,6 +1,6 @@
 export const APP_TITLE = "NoticeBook";
-export const DATABASE_PREFIX = "yb";
-export const EMAIL_SENDER = '"noticebook" <noreply@noticebook.com>';
+export const DATABASE_PREFIX = "nb";
+export const EMAIL_SENDER = '"noticebook" <neupanebishal07@gmail.com>';
 
 export const redirects = {
   toLogin: "/login",
