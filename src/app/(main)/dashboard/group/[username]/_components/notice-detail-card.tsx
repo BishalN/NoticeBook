@@ -1,6 +1,5 @@
 "use client";
 
-import { PostPreview } from "@/app/(main)/editor/[postId]/_components/post-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { PostPreview } from "../../_components/post-preview";
 
 dayjs.extend(relativeTime);
 

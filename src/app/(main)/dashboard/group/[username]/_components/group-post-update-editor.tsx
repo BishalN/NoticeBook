@@ -17,11 +17,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { updateGroupPostSchema } from "@/server/api/routers/group/group.input";
-import { PostPreview } from "@/app/(main)/editor/[postId]/_components/post-preview";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { type GroupPost } from "@/server/db/schema";
+import { PostPreview } from "../../_components/post-preview";
 
 const markdownlink = "https://remarkjs.github.io/react-markdown/";
 
