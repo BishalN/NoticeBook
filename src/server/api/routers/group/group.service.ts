@@ -180,6 +180,8 @@ export const createGroupPost = async (ctx: ProtectedTRPCContext, input: CreateGr
       ),
   });
 
+  if (relatedTokens.length === 0) return;
+
   const message = {
     title: input.title,
     excerpt: input.excerpt,

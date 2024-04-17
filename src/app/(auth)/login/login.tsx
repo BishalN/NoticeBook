@@ -4,19 +4,14 @@ import Link from "next/link";
 import { useFormState } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PasswordInput } from "@/components/password-input";
 import { DiscordLogoIcon } from "@/components/icons";
 import { APP_TITLE } from "@/lib/constants";
 import { login } from "@/lib/auth/actions";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
+import { GlobeIcon } from "lucide-react";
 
 export function Login() {
   const [state, formAction] = useFormState(login, null);
@@ -25,17 +20,25 @@ export function Login() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle>{APP_TITLE} Log In</CardTitle>
-        <CardDescription>
-          Log in to your account to access your dashboard
-        </CardDescription>
+        <CardDescription>Log in to your account to access your dashboard</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button variant="outline" className="w-full" asChild>
-          <Link href="/login/discord">
-            <DiscordLogoIcon className="mr-2 h-5 w-5" />
-            Log in with Discord
-          </Link>
-        </Button>
+        <div className="space-y-3">
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/login/discord">
+              <DiscordLogoIcon className="mr-2 h-5 w-5" />
+              Log in with Discord
+            </Link>
+          </Button>
+
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/login/google">
+              <GlobeIcon className="mr-2 h-5 w-5" />
+              Log in with Google
+            </Link>
+          </Button>
+        </div>
+
         <div className="my-2 flex items-center">
           <div className="flex-grow border-t border-muted" />
           <div className="mx-2 text-muted-foreground">or</div>
