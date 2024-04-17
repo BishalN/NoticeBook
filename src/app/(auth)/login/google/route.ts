@@ -2,8 +2,7 @@ import { cookies } from "next/headers";
 import { generateState } from "arctic";
 import { google } from "@/lib/auth";
 import { env } from "@/env";
-
-export const GOOGLE_CODE_VERIFIER = "something_cryptic-code-verifier";
+import { GOOGLE_CODE_VERIFIER } from "@/lib/constants";
 
 export async function GET(): Promise<Response> {
   const state = generateState();

@@ -4,9 +4,8 @@ import { OAuth2RequestError } from "arctic";
 import { eq } from "drizzle-orm";
 import { lucia, google } from "@/lib/auth";
 import { db } from "@/server/db";
-import { redirects } from "@/lib/constants";
+import { GOOGLE_CODE_VERIFIER, redirects } from "@/lib/constants";
 import { users } from "@/server/db/schema";
-import { GOOGLE_CODE_VERIFIER } from "../route";
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
