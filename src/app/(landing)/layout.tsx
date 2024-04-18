@@ -6,7 +6,7 @@ import { Footer } from "./_components/footer";
 
 export const metadata: Metadata = {
   title: APP_TITLE,
-  description: "A Next.js starter with T3 stack and Lucia auth.",
+  description: `Empower your groups with instant communication. ${APP_TITLE}—the ultimate digital noticeboard solution`,
 };
 
 function LandingPageLayout({ children }: { children: ReactNode }) {

@@ -13,10 +13,6 @@ import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 const routes = [
   { name: "Home", href: "/" },
   { name: "Features", href: "/#features" },
-  {
-    name: "Documentation",
-    href: "https://www.touha.dev/posts/simple-nextjs-t3-authentication-with-lucia",
-  },
 ] as const;
 
 export const Header = () => {
@@ -43,10 +39,7 @@ export const Header = () => {
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Link
-          className="flex items-center justify-center text-xl font-medium"
-          href="/"
-        >
+        <Link className="flex items-center justify-center text-xl font-medium" href="/">
           <RocketIcon className="mr-2 h-5 w-5" /> {APP_TITLE}
         </Link>
         <nav className="ml-10 hidden gap-4 sm:gap-6 md:flex">
