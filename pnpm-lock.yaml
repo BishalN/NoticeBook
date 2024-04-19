@@ -17,6 +17,9 @@ dependencies:
   '@lucia-auth/adapter-drizzle':
     specifier: 1.0.0
     version: 1.0.0(lucia@3.0.0)
+  '@neondatabase/serverless':
+    specifier: ^0.9.1
+    version: 0.9.1
   '@radix-ui/react-alert-dialog':
     specifier: ^1.0.5
     version: 1.0.5(@types/react-dom@18.2.17)(@types/react@18.2.43)(react-dom@18.2.0)(react@18.2.0)
@@ -115,7 +118,7 @@ dependencies:
     version: 1.11.10
   drizzle-orm:
     specifier: ^0.30.7
-    version: 0.30.7(@types/react@18.2.43)(@vercel/postgres@0.8.0)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0)
+    version: 0.30.7(@neondatabase/serverless@0.9.1)(@types/react@18.2.43)(@vercel/postgres@0.8.0)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0)
   firebase:
     specifier: ^10.11.0
     version: 10.11.0
@@ -1470,6 +1473,12 @@ packages:
 
   /@neondatabase/serverless@0.7.2:
     resolution: {integrity: sha512-wU3WA2uTyNO7wjPs3Mg0G01jztAxUxzd9/mskMmtPwPTjf7JKWi9AW5/puOGXLxmZ9PVgRFeBVRVYq5nBPhsCg==}
+    dependencies:
+      '@types/pg': 8.6.6
+    dev: false
+
+  /@neondatabase/serverless@0.9.1:
+    resolution: {integrity: sha512-Xi+tVIXuaeB24BHzhr0W/4vcbb9WwIaB6yK0RsMIteLtzNB86+am6EDFovd3rYCYM1ea7rWcwte2dLOrzW7eqA==}
     dependencies:
       '@types/pg': 8.6.6
     dev: false
@@ -4551,7 +4560,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.30.7(@types/react@18.2.43)(@vercel/postgres@0.8.0)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0):
+  /drizzle-orm@0.30.7(@neondatabase/serverless@0.9.1)(@types/react@18.2.43)(@vercel/postgres@0.8.0)(pg@8.11.5)(postgres@3.4.4)(react@18.2.0):
     resolution: {integrity: sha512-9qefSZQlu2fO2qv24piHyWFWcxcOY15//0v4j8qomMqaxzipNoG+fUBrQ7Ftk7PY7APRbRdn/nkEXWxiI4a8mw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -4631,6 +4640,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
+      '@neondatabase/serverless': 0.9.1
       '@types/react': 18.2.43
       '@vercel/postgres': 0.8.0
       pg: 8.11.5
