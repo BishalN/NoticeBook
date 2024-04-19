@@ -17,7 +17,7 @@ export function GroupCard({ promises }: GroupsProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
         {groups.length > 0 &&
           groups.map((group) => (
             <Card

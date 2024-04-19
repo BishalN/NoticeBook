@@ -35,12 +35,12 @@ export default async function GroupPage({ searchParams }: Props) {
   return (
     <div className="grid gap-8">
       <div className="flex flex-wrap justify-between">
-        <div>
+        <div className="">
           <h1 className="text-3xl font-bold md:text-4xl">Groups</h1>
           <p className="text-sm text-muted-foreground">Manage your account groups</p>
         </div>
         <NotificationManager />
-        <div className="space-x-3">
+        <div className="space-x-3 space-y-2">
           <CreateGroupDialog />
           <JoinGroupDialog />
         </div>

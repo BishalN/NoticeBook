@@ -1,40 +1,15 @@
 import Link from "next/link";
 import { type Metadata } from "next";
-import { PlusIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { CopyToClipboard } from "./_components/copy-to-clipboard";
-import {
-  Drizzle,
-  LuciaAuth,
-  NextjsLight,
-  NextjsDark,
-  ReactJs,
-  ShadcnUi,
-  TRPC,
-  TailwindCss,
-  StripeLogo,
-  ReactEmail,
-} from "./_components/feature-icons";
+import { LuciaAuth } from "./_components/feature-icons";
 import CardSpotlight from "./_components/hover-card";
 import { APP_TITLE } from "@/lib/constants";
-import {
-  ArrowDown10Icon,
-  ArrowDownIcon,
-  ArrowRightIcon,
-  FilePlusIcon,
-  GroupIcon,
-  LogInIcon,
-  UserPlusIcon,
-} from "lucide-react";
-import { Arrow } from "@radix-ui/react-dropdown-menu";
+import { ArrowDownIcon, FilePlusIcon, GroupIcon, LogInIcon, UserPlusIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "NoticeBook",
   description: `Empower your groups with instant communication. ${APP_TITLE}—the ultimate digital noticeboard solution`,
 };
-
-const githubUrl = "https://github.com/iamtouha/next-lucia-auth";
 
 const userJourney = [
   {
@@ -65,9 +40,6 @@ const HomePage = () => {
     <>
       <section className="mx-auto grid min-h-[calc(100vh-300px)] max-w-5xl flex-col  items-center justify-center gap-4 py-10 text-center  md:py-12">
         <div className="p-4">
-          <div className="mb-10 flex items-center justify-center gap-3">
-            <LuciaAuth className="h-14 w-14" />
-          </div>
           <h1 className="text-balance bg-gradient-to-tr  from-black/70 via-black to-black/60 bg-clip-text text-center text-3xl font-bold text-transparent dark:from-zinc-400/10 dark:via-white/90 dark:to-white/20  sm:text-5xl md:text-6xl lg:text-7xl">
             Simplify Group Communication
           </h1>
@@ -82,7 +54,8 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      <section>
+
+      <section className="">
         <div className="container mx-auto lg:max-w-screen-lg">
           <h1 className="mb-4 text-center text-3xl font-bold md:text-4xl lg:text-5xl">
             <a id="userJourney"></a> How it works ?
@@ -91,9 +64,10 @@ const HomePage = () => {
             Login, create groups, invite members, post updates, and notify your community
             effortlessly.
           </p>
-          <div className="">
+
+          <div className="px-4">
             {userJourney.map((feature, i) => (
-              <div className="flex flex-col   items-center justify-center space-y-5" key={i}>
+              <div className="flex flex-col items-center justify-center space-y-5" key={i}>
                 <CardSpotlight
                   key={i}
                   name={feature.name}

@@ -64,6 +64,7 @@ export const CreateGroupDialog = () => {
       }
       title="Create a new group"
       description="Create a new group to collaborate with your team."
+      footer
     >
       <Form {...form}>
         <form ref={formRef} onSubmit={onSubmit} className="block max-w-screen-md space-y-4">
