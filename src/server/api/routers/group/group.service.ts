@@ -63,20 +63,21 @@ export const createGroup = async (ctx: ProtectedTRPCContext, input: CreateGroupI
     throw new TRPCError({ message: "Username already taken", code: "CONFLICT", cause: "username" });
   }
 
-  await ctx.db.transaction(async (db) => {
-    await db.insert(groups).values({
-      id,
-      username: input.username,
-      description: input.description,
-    });
-
-    await db.insert(groupMembers).values({
-      id,
-      userId: ctx.user.id,
-      groupId: id,
-      role: "admin",
-    });
+  // ISSUE: TRANSACTION not supported neon-http-driver
+  // await ctx.db.transaction(async (db) => {
+  await ctx.db.insert(groups).values({
+    id,
+    username: input.username,
+    description: input.description,
   });
+
+  await ctx.db.insert(groupMembers).values({
+    id,
+    userId: ctx.user.id,
+    groupId: id,
+    role: "admin",
+  });
+  // });
 };
 
 export const getGroupByUsername = async (
