@@ -5,11 +5,9 @@ import useFCM from "@/utils/useFcm";
 import React, { useEffect } from "react";
 
 export const NotificationManager = () => {
-  const { fcmToken, messages } = useFCM();
+  const { fcmToken } = useFCM();
 
   const addFCMToken = api.user.addFCMToken.useMutation();
-
-  console.log(messages);
 
   // TODO: Don't send the token every time
   // Only send it if it's different

@@ -190,24 +190,19 @@ export const createGroupPost = async (ctx: ProtectedTRPCContext, input: CreateGr
     groupId: input.groupId,
   };
 
-  void firebase_admin
-    .messaging()
-    .sendEachForMulticast({
-      tokens: relatedTokens.map((token) => token.fcmToken),
-      webpush: {
-        notification: {
-          title: input.title,
-          body: input.excerpt,
-        },
-      },
-      data: message,
+  void firebase_admin.messaging().sendEachForMulticast({
+    tokens: relatedTokens.map((token) => token.fcmToken),
+    webpush: {
       notification: {
         title: input.title,
+        body: input.excerpt,
       },
-    })
-    .then((res) => {
-      console.log("Notification sent", res);
-    });
+    },
+    data: message,
+    notification: {
+      title: input.title,
+    },
+  });
 };
 
 export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroupPostInput) => {
@@ -229,14 +224,10 @@ export const listGroupPosts = async (ctx: ProtectedTRPCContext, input: ListGroup
     .from(groupPosts)
     .where(eq(groupPosts.groupId, input.groupId));
 
-  console.log(numOfPosts[0]?.postsCount, "post counts");
-
   const ITEMS_PER_PAGE = 6;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-expect-error
   const totalPages = Math.ceil(numOfPosts[0]?.postsCount / ITEMS_PER_PAGE);
-
-  console.log(totalPages, "total pages");
 
   const data = await ctx.db.query.groupPosts.findMany({
     where: (table, { eq }) => eq(table.groupId, input.groupId),

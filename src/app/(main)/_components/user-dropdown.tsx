@@ -59,12 +59,12 @@ export const UserDropdown = ({
           <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
             <Link href="/dashboard">Dashboard</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
+          {/* <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
             <Link href="/dashboard/billing">Billing</Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
             <Link href="/dashboard/settings">Settings</Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 

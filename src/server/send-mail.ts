@@ -79,7 +79,6 @@ export async function sendMail({ to, body, subject }: MessageInfo) {
 
   try {
     const result = await ses.sendEmail(params).promise();
-    console.log("Email sent:", result.MessageId);
     return result.MessageId;
   } catch (error) {
     console.error("Error sending email:", error);

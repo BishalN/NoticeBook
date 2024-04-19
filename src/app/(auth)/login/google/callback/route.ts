@@ -30,8 +30,6 @@ export async function GET(request: Request): Promise<Response> {
     });
     const googleUser = (await googleUserInfo.json()) as googleUser;
 
-    console.log("GOOGLE_USER_HERE", googleUser);
-
     if (!googleUser.email || !googleUser.email_verified) {
       return new Response(
         JSON.stringify({

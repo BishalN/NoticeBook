@@ -12,16 +12,16 @@ const items = [
     href: "/dashboard",
     icon: GroupIcon,
   },
-  {
-    title: "Billing",
-    href: "/dashboard/billing",
-    icon: CreditCard,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: GearIcon,
-  },
+  // {
+  //   title: "Billing",
+  //   href: "/dashboard/billing",
+  //   icon: CreditCard,
+  // },
+  // {
+  //   title: "Settings",
+  //   href: "/dashboard/settings",
+  //   icon: GearIcon,
+  // },
 ];
 
 interface Props {
