@@ -40,7 +40,7 @@ export const NoticeCard = ({
   return (
     <Card className="shadow-xl">
       <CardHeader>
-        <div className="mb-3 flex justify-between space-x-3">
+        <div className="mb-3 flex flex-wrap justify-between space-x-3">
           <div className="flex space-x-3">
             <Avatar>
               <AvatarImage src={avatar} />
@@ -54,7 +54,7 @@ export const NoticeCard = ({
           </div>
 
           {isAdmin && (
-            <div className="space-x-3">
+            <div className="my-2 space-x-3 sm:my-0">
               <Button
                 variant="secondary"
                 className="space-x-2"
@@ -65,13 +65,12 @@ export const NoticeCard = ({
                 <PencilIcon className="h-4 w-4" />
                 <span>Edit</span>
               </Button>
-
               <ConfirmGroupPostDelete groupId={groupId} postId={noticeId} />
             </div>
           )}
         </div>
         <div className="mb-3">
-          <h1 className="text-2xl font-semibold">{title}</h1>
+          <h1 className="text-xl font-semibold sm:text-2xl">{title}</h1>
           <h2 className="text-muted-foreground">{excerpt}</h2>
           <Button
             variant="secondary"
@@ -79,7 +78,7 @@ export const NoticeCard = ({
             onClick={() => router.push(`/dashboard/group/${groupUsername}/notice/${noticeId}`)}
           >
             <PlusIcon className="h-4 w-4" />
-            <span>Read More</span>
+            <span className="text-xs sm:text-sm">Read More</span>
           </Button>
         </div>
       </CardHeader>

@@ -22,7 +22,7 @@ export default async function Page({ params }: { params: { username: string; not
   return (
     <div>
       <div className="flex justify-between">
-        <h1 className="text-3xl font-bold">{params.username}</h1>
+        <h1 className=" text-2xl font-bold sm:text-3xl">{params.username}</h1>
       </div>
       <NoticeDetailCard
         avatar={notice.user.avatar ?? ""}

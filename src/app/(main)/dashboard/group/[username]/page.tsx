@@ -40,7 +40,7 @@ export default async function Page({
           <Link href={`/dashboard/group/${params.username}/admin?tab=invite`} passHref>
             <Button className="space-x-2" variant="secondary">
               <ArrowRightIcon className="h-4 w-4" />
-              <span>Go to Admin page</span>
+              <span className="text-xs sm:text-sm">Go to Admin page</span>
             </Button>
           </Link>
         )}

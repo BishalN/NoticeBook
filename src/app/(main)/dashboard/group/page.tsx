@@ -40,7 +40,7 @@ export default async function GroupPage({ searchParams }: Props) {
           <p className="text-sm text-muted-foreground">Manage your account groups</p>
         </div>
         <NotificationManager />
-        <div className="space-x-3 space-y-2">
+        <div className="mt-2 flex space-x-2">
           <CreateGroupDialog />
           <JoinGroupDialog />
         </div>

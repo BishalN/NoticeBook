@@ -37,7 +37,7 @@ export const NoticeDetailCard = ({
   return (
     <Card className="my-4">
       <CardHeader>
-        <div className="mb-3 flex justify-between space-x-3">
+        <div className="mb-3 flex flex-wrap justify-between space-x-3">
           <div className="flex space-x-3">
             <Avatar>
               <AvatarImage src={avatar} />
@@ -53,7 +53,7 @@ export const NoticeDetailCard = ({
           {isAdmin && (
             <Button
               variant="secondary"
-              className="space-x-2"
+              className="mt-4 space-x-2 sm:mt-0"
               onClick={() =>
                 router.push(`/dashboard/group/${groupUsername}/admin/edit/${noticeId}`)
               }

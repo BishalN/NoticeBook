@@ -27,7 +27,6 @@ export default async function Page({ params }: { params: { username: string; not
     <div>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold">{params.username}</h1>
-        <h1>This is edit notice page</h1>
       </div>
 
       <GroupPostUpdateEditor
