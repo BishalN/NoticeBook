@@ -14,7 +14,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { GlobeIcon } from "lucide-react";
 
 export function Login() {
-  const [state, formAction] = useFormState(login, null);
+  // const [state, formAction] = useFormState(login, null);
 
   return (
     <Card className="w-full max-w-md">
@@ -39,7 +39,7 @@ export function Login() {
           </Button>
         </div>
 
-        <div className="my-2 flex items-center">
+        {/* <div className="my-2 flex items-center">
           <div className="flex-grow border-t border-muted" />
           <div className="mx-2 text-muted-foreground">or</div>
           <div className="flex-grow border-t border-muted" />
@@ -92,7 +92,7 @@ export function Login() {
           <Button variant="outline" className="w-full" asChild>
             <Link href="/">Cancel</Link>
           </Button>
-        </form>
+        </form> */}
       </CardContent>
     </Card>
   );

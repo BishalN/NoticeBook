@@ -6,7 +6,7 @@ import { env } from "@/env";
 import * as schema from "./schema";
 
 export async function runMigrate() {
-  const connection = postgres(env.DATABASE_URL);
+  const connection = postgres(env.POSTGRES_URL);
   const db = drizzle(connection, { schema });
 
   console.log("⏳ Running migrations...");

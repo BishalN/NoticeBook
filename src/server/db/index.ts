@@ -1,7 +1,7 @@
-import { drizzle } from "drizzle-orm/vercel-postgres";
 import postgres from "postgres";
 import { env } from "@/env";
 import * as schema from "./schema";
+import { drizzle } from "drizzle-orm/postgres-js";
 
 export const connection = postgres(env.POSTGRES_URL, {
   max_lifetime: 10, // Remove this line if you're deploying to Docker / VPS

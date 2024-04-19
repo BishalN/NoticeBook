@@ -38,7 +38,7 @@ export function Signup() {
             </Link>
           </Button>
         </div>
-        <div className="my-2 flex items-center">
+        {/* <div className="my-2 flex items-center">
           <div className="flex-grow border-t border-muted" />
           <div className="mx-2 text-muted-foreground">or</div>
           <div className="flex-grow border-t border-muted" />
@@ -90,7 +90,7 @@ export function Signup() {
           <Button variant="outline" className="w-full" asChild>
             <Link href="/">Cancel</Link>
           </Button>
-        </form>
+        </form> */}
       </CardContent>
     </Card>
   );
