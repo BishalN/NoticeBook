@@ -14,7 +14,7 @@ export const env = createEnv({
     //     (str) => !str.includes("YOUR_DATABASE_URL_HERE"),
     //     "You forgot to change the default URL",
     //   ),
-    POSTGRES_URL: z.string().url(),
+    DATABASE_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DISCORD_CLIENT_ID: z.string().trim().min(1),
     DISCORD_CLIENT_SECRET: z.string().trim().min(1),
@@ -53,7 +53,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     // Server-side env vars
-    POSTGRES_URL: process.env.POSTGRES_URL,
+    DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     // SMTP_HOST: process.env.SMTP_HOST,
     // SMTP_PORT: parseInt(process.env.SMTP_PORT ?? ""),
